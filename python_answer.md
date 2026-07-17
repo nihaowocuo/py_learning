@@ -128,3 +128,9 @@ Windows 的 App Execution Alias 是 UWP/Store 应用的一种机制，让传统�
    - `sys.exit()`：脚本中推荐的退出方式。
    - `os._exit()`：立即终止进程，不清理资源，特殊场景使用。
    - 注意：截图中的 `quit` 是 Python 自带的，不是 SQL 的 `quit`；数据库的 `quit` 是 SQL 客户端命令，两者只是名字相同。
+
+7. **Python 是否会自动转换数据类型**
+   - 数值类型（int/float/complex）混合运算会**自动提升**：int+float→float；`/` 除法永远返回 float；`//` 整除含 float 时返回 float。
+   - Python 是**强类型**语言：int 与 str 等不同类型**不能直接运算**，会报 `TypeError`，必须显式转换（`int()`、`str()`、`float()`）。
+   - `bool` 是 `int` 的子类，`True==1`、`False==0`，可参与算术。
+   - 结论：仅**数值类型之间**有自动提升；**跨类型（尤其数字与字符串）不会自动转换**，需手动转换。

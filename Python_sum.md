@@ -67,3 +67,6 @@ Python 解释器与 Python 环境是什么关系？没有解释器是否仍能�
 
 6. **Q：退出 Python 只能用 `exit()` 吗？`quit` 也能退出？**
    **A：** `exit()` 与 `quit()` 在 Python 交互式解释器中都是退出别名，等价；还有 `Ctrl+Z`（Win）、`Ctrl+D`（Linux/Mac）、`sys.exit()`、`os._exit()` 等。`quit` 不是 SQL 专用命令，Python 自己也有同名退出对象。
+
+7. **Q：Python 计算中无需转换数据类型，会自动转换吗？**
+   **A：** 部分错误。数值类型（int/float/complex）运算会自动提升（int+float→float，`/` 永远 float）；但 Python 是强类型，int 与 str 等不同类型不能直接运算会报错，需手动 `int()`/`str()` 转换。结论：仅数值类型间自动提升，跨类型不会自动转换。
