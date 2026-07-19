@@ -70,3 +70,6 @@ Python 解释器与 Python 环境是什么关系？没有解释器是否仍能�
 
 7. **Q：Python 计算中无需转换数据类型，会自动转换吗？**
    **A：** 部分错误。数值类型（int/float/complex）运算会自动提升（int+float→float，`/` 永远 float）；但 Python 是强类型，int 与 str 等不同类型不能直接运算会报错，需手动 `int()`/`str()` 转换。结论：仅数值类型间自动提升，跨类型不会自动转换。
+
+8. **Q：为什么 `"当前剩余的钱：" + money` 报错 TypeError？**
+   **A：** 因为 `money` 是 float，字符串 `+` 只能拼接 str，不能自动转 float 为 str。修复用 `str(money)`、推荐 `f"..."` 或 `%.2f` 格式化。本质：Python 强类型，跨类型不自动转换。

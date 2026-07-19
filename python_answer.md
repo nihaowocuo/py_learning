@@ -134,3 +134,11 @@ Windows 的 App Execution Alias 是 UWP/Store 应用的一种机制，让传统�
    - Python 是**强类型**语言：int 与 str 等不同类型**不能直接运算**，会报 `TypeError`，必须显式转换（`int()`、`str()`、`float()`）。
    - `bool` 是 `int` 的子类，`True==1`、`False==0`，可参与算术。
    - 结论：仅**数值类型之间**有自动提升；**跨类型（尤其数字与字符串）不会自动转换**，需手动转换。
+
+8. **字符串与数字不能直接拼接**
+   - 原因：Python 的 `+` 在字符串间是拼接，但要求两边都是 `str`；`money` 是 `float`（由 `float(input(...))` 转换而来），Python 不会自动把 `float` 转成 `str`。
+   - 修复方式：
+     - `str()` 转换：`"当前剩余的钱：" + str(money)`
+     - 推荐 f-string：`f"当前剩余的钱：{money}"`
+     - 格式化：`"当前剩余的钱：%.2f" % money`
+   - 本质：Python 是强类型语言，跨类型（str 与 float）不会自动转换，必须显式处理。

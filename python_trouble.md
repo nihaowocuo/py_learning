@@ -37,3 +37,5 @@ python 解释器与 python 环境是什么关系，没有 python 解释器，是
 6. 退出 Python 的指令不只有 `exit()` 吗？截图里输入 `quit` 也退出了，这是否是数据库用的 `quit` 指令也可以用在 Python 中？
 
 7. Python 计算中无需进行数据类型转换，便可以自动转换吗？
+
+8. 为什么 `print("当前剩余的钱：" + money)` 会报错 `TypeError: can only concatenate str (not "float") to str`？
