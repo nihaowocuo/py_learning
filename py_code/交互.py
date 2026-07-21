@@ -29,3 +29,19 @@
 # print(f"当前剩余的钱：{money}")
 
 # 循环
+# i = 1
+# while i <= 13:
+#     print(i)
+#     i = i + 1
+# i = 1
+# sum = 0
+# while i <= 15:
+#     sum = sum + i
+#     i = i + 1
+# print(sum)
+while True:
+    content = input("请输入你要说的话：")
+    if content == "quit":
+        break
+    print("发送给他人：",content)
+
