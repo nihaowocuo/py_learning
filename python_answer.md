@@ -149,3 +149,15 @@ Windows 的 App Execution Alias 是 UWP/Store 应用的一种机制，让传统�
    - 判断 `None` 用惯用法 `x is None`（不用 `==`）。
    - 浮点数别直接用 `==`（精度误差，如 `0.1+0.2 != 0.3`），用 `math.isclose()`。
    - 结论：判值相等用 `==`；判同对象/是否为 None 才用 `is`。
+
+10. **print 默认换行与取消换行**
+    - 原因：`print()` 默认 `end='\n'`，即末尾自动加换行符。
+    - 取消换行：使用 `end=''` 参数：`print('A', end='')`。
+    - 自定义结尾：如 `end=' '` 表示以空格结尾，不换行；`end='---'` 可自定义结束符。
+    - 原理：`print(*objects, sep=' ', end='\n', file=sys.stdout)`，`end` 控制输出结束符。
+
+11. **Python 没有 double 类型**
+    - Python 中只有 `float`（浮点数），但它本身就是 **64 位双精度浮点**（IEEE 754 double），与 C/Java 的 `double` 等价。
+    - `type(3.14)` 返回 `<class 'float'>`，没有 `double` 关键字。
+    - 如果需要更高精度（如财务计算），使用 `decimal.Decimal` 模块；`Decimal` 提供任意精度十进制浮点。
+    - `sys.float_info` 可查看 float 的精度范围（mant_dig=53 位尾数，约 15–17 位有效数字）。

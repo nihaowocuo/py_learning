@@ -41,3 +41,7 @@ python 解释器与 python 环境是什么关系，没有 python 解释器，是
 8. 为什么 `print("当前剩余的钱：" + money)` 会报错 `TypeError: can only concatenate str (not "float") to str`？
 
 9. `==` 可直接判断字符串是否相等，那其他类型的相等判断条件是什么（如数字、列表，以及 `==` 与 `is` 的区别）？
+
+10. print 打印默认换行，该如何让其不换行？
+
+11. Python 中没有 double 类型吗？
