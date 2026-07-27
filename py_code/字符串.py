@@ -160,3 +160,58 @@
 #     print("验证码正确！")
 # else:
 #     print("验证码不正确！")
+
+# 字符串的替换和切割
+# s = "    你好，   我是垂杨    ！  "
+# 去除左右两端的空格
+# s1 = s.strip()
+# print(s)
+# print(s1)
+
+# 实际例子
+# 如果在名字或者代码后加入空格，此时采用肉眼是无法发现的，这样便会导致登录失败
+# user_name = input("请输入你的用户名：")
+# user_password = input("请输入你的密码：")
+
+# 而这种便可以去除两侧的空格
+# user_name = input("请输入你的用户名：").strip()
+# user_password = input("请输入你的密码：").strip()
+#
+# if user_name == "admin":
+#     if user_password == "123456":
+#         print("登陆成功！")
+#     else:
+#         print("登陆失败！")
+# else:
+#     print("登陆失败！")
+
+# strip()的作用不只是去除字符串两侧的空白符（空格，\t制表符，就是缩进Tab。\n为换行符)
+
+# 要去除所有的空格，包括字符中间的空格
+# 要采用替换
+# s = "你好啊 我是  垂杨"
+# 此处我在垂杨后加个空格，就会出现问题，无法替换
+# s1 = s.replace("垂杨 ", "天下")
+# s1 = s.replace("垂杨", "天下")
+# print(s)
+# print(s1)
+
+# s = "I have a dream!"
+# 如果前后都有呢，是否有类似strip的功能
+# s = "   I have a dream!  "
+# 测试成功
+# 去除所有的空格
+# s1 = s.replace(" ", "")
+# print(s1)
+
+# split:切割，该用什么切割？
+# 字符串切割
+# a = "python_java_c++_javascript"
+# 通过_切割,切割后的内容放入列表中
+# lst = a.split("_")
+# 用java去切
+# lst = a.split("java")
+# 输出结果中java损失了，用什么去切割，则什么会被损失
+# print(lst)
+
+# 今日重点，strip(),replace(),solit()
