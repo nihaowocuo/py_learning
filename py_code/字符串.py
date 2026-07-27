@@ -215,3 +215,91 @@
 # print(lst)
 
 # 今日重点，strip(),replace(),solit()
+
+# 字符串的查找和替换
+
+# 查找：find 与 index在于具体查找位置
+# 而in直接判断是否存在
+#    0 1 23 4 5 6 7
+s = "你好啊，我是垂杨"
+# 如果查找不到返回-1
+# result = s.find("垂杨123")
+# print(result)
+
+# 但此没查找到直接报错
+# res = s.index("垂杨123")
+# print(res)
+# 但不常用此种测试方法
+
+# 一般采用
+# 直接输出true
+# print("垂杨" in s)
+# print("垂杨123" in s)
+# 相反判断
+# print("垂杨" not in s)
+# print("垂杨123" not in s)
+
+# 可进行判断
+# name = input("请输入你的名字：")
+# # 判断你是否姓张
+# # startwitch(),此方法判断是否以什么开头，endwith()表示以什么结尾
+# # 常用startwith()
+# if name.startswith("张"):
+#     print("你姓张")
+# else:
+#     print("你不姓张")
+
+# 那我该如何判断用户是否为数字
+# money = input("请输入你的钱：")
+# # 判断字符串是否为整数组成，isdigit()判断更为宽松，只要是数字字符一般都可以判断成功
+# # if  money.isdigit():
+# # 此为判断十进制数，这个是严格控制十进制数，其他的数字字符如2的次方等
+# if money.isdecimal():
+#     # 转换为
+#     money = int(money)
+#     print("可以花钱")
+# else:
+#     print("对不起你输入的有误")
+
+# 3.5 补充总结
+# 与print()一样均为内置函数，type(), input()也是
+# s = "你好"
+# len所求为长度，从1开始的
+# print(len(s))
+
+# join()
+# 我又能否使用字符串拼接起来
+# s = "python"
+# s1 = "java"
+# s2 = "c++"
+# s3 = "javascript"
+#
+# # 我该如何连起来
+# # lst = ['你好', '我错','没毛病']
+# # 用_将以上的字符连接起来
+# # s = "_".join(lst)
+# # print(s + " " + s1 + " " + s2 + " " + s3)
+# # 同样你也可以使用join连接
+# s5 = "_".join([s,s1,s2,s3])
+# print(s5)
+
+# 总结：
+# 1.f"string{变量}"
+# 2.索引：从0开始[]
+#   切片：s[start,stop,step]，注意stop的位置是拿不到的，因为这是从零开始计数，实际已包含stop个
+# 3.相关操作
+# 前提：字符串对原字符串是不进行改变的
+# 而是创建一个新的字符串
+#   1.upper（）忽略大小写
+#   2.strip()去除字符串左右两侧的空白符（空格，\t,\n）
+#   3.relace("old","new")替换
+#   4.spilt()进行切割
+#   5.join()字符串拼接
+#   6.startwith()判断字符串是否以xxx开头，同理也有结尾
+#   7.len()计算字符串长度，其所使用的是从1开始计数
+#   字符串循环和遍历
+# for c in s:
+#     print(c)遍历打印字符串中的每一个字符
+#   in：
+#       1.判断xxx是否在某字符串内
+#       2. for循环

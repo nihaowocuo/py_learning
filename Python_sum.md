@@ -121,3 +121,24 @@ cat >> "E:/py_learning/.workbuddy/memory/2026-07-26.md" <<'EOF'
 
 cat >> "E:/py_learning/.workbuddy/memory/2026-07-26.md" <<'EOF'
 - 第 20 个 Python 问答（混合大小写安全被忽略比较抵消）：已追加到三文档。要点：组合数=字符集^长度，混合52比单26多2^N倍安全(N=4≈16倍)；但.upper()比较归一26使混合收益归零；修复=精确比较+提示区分，或单大小写直接==。
+
+21. **Q：`money.isdight()` 报错 AttributeError 是什么原因？**
+    **A：** 方法名拼写错误。Python 只有 `isdigit()`，没有 `isdight()`（g/t 顺序写反）。报错里的 `Did you mean: 'isdigit'?` 已直接提示。修复：改成 `money.isdigit()`。注意 `isdigit()` 只认纯数字，小数点、负号都会返回 False。
+
+22. **Q：输入 123.2 后 `isdecimal()` 判断失败，它不是判断小数的吗？**
+    **A：** `isdecimal()` 只认纯十进制数字字符，`123.2` 含小数点 → False。`isdigit/isdecimal/isnumeric` 都不认识小数点、负号、e。判断小数应使用 `float()` + try/except。结论：`isdecimal()` 判断纯数字串，非小数。
+
+23. **Q：PyCharm 提示 `isdecimal()`，为什么叫"小数"？它和小数有关吗？**
+    **A：** `decimal` 英文是"十进制的"，不是"小数"，中文误译导致混淆。`isdecimal()` 判断字符串是否全由十进制数字字符(0-9)组成，与小数判断无关。判断小数用 `float()` + try/except。
+
+24. **Q：`isdigit` 是什么？与 `isdecimal` 的不同？**
+    **A：** `isdigit()` 判断字符串是否全由数字字符组成，比 `isdecimal()` 宽松，额外接受上标(²)、圈号(①)等；两者都不认小数点、负号、中文数字、分数。日常判断纯整数输入用 `isdigit()`；小数用 `float()` + try/except。宽松度：isnumeric >= isdigit >= isdecimal。
+
+25. **Q：能否将多个字符串连接起来，像列表一样？**
+    **A：** 能。方法：`+` 拼接、推荐 `join()`、f-string、循环。多个或大量字符串拼接用 `join()` 性能最佳（一次性分配内存，比循环 `s = s + x` 快几十倍）。`sep.join(列表)`，元素必须全是字符串。列表合并和字符串拼接是两回事。
+
+26. **Q：多个独立变量字符串（s / s1 / s2 / s3）能否用 join 一起拼接？**
+    **A：** `join` 只接 1 个可迭代对象，直接传多参数会 `TypeError`。解法：装进 list / tuple 再 join，或直接 `+` 拼接，或 f-string。变量多/动态时优先装容器再 join；少而固定可用 `+` 或 f-string。
+
+27. **Q：`"_".join(s, s1, s2, s3)` 为何报 TypeError？**
+    **A：** `join` 只接受 1 个可迭代对象参数，你传了 4 个字符串。修复：装 list → `"_".join([s, s1, s2, s3])`；或用 `+`/f-string。

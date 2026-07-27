@@ -63,3 +63,17 @@ python 解释器与 python 环境是什么关系，没有 python 解释器，是
 19. 验证码比较用 `user_input.upper() == verify_code.upper()` 是否有安全风险？既然统一转大写比较，为何生成的验证码还要混合大小写（如 "Xado"）？
 
 20. 我故意用混合大小写验证码就是为了增加安全性，但 `.upper()` 比较让用户无需完全一致输入也能通过，这不就抵消了安全提升吗？
+
+21. `money.isdight()` 报错 `AttributeError: 'str' object has no attribute 'isdight'. Did you mean: 'isdigit'?` 是什么原因？
+
+22. 输入 `123.2` 后，`if money.isdecimal():` 判断失败，输出"对不起你输入的有误"，这是为什么？`isdecimal()` 难道不是用来判断小数的吗？
+
+23. 输入 `money.isde()` 时 PyCharm 提示 `isdecimal()`，为什么叫"小数"？它和小数有什么关系？
+
+24. `isdigit` 是什么？它和 `isdecimal` 有什么不同？
+
+25. 能否将多个字符串像列表那样拼接起来？比如多个字符串连接成一个长字符串？
+
+26. 多个字符串以独立变量形式（s / s1 / s2 / s3）存在时，能否用 `join()` 一起拼接？
+
+27. `"_".join(s, s1, s2, s3)` 为何报错 `TypeError: str.join() takes exactly one argument (4 given)`？
