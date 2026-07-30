@@ -53,7 +53,11 @@ from requests_toolbelt.utils.deprecated import find_pragma
 
 # remove也是删除,不过是直接删除其中的元素,如果列表中没有,则会报错
 # 如下
+# lst = ["ns","sdw","swd","ffh"]
+# print(lst)
+# # remove直接移除元素，不可移除索引
 # lst.remove(3)
+# print(lst)
 # lst.remove("你好")
 # print(lst)
 
@@ -129,9 +133,9 @@ from requests_toolbelt.utils.deprecated import find_pragma
 # 我想将姓张的全部删除
 # lst = ["张无天","张二狗","张丹","刘云","吴先"]
 # lst = ["张无天","张二狗","张丹","张大大","刘云","吴先"]
-lst = ["张无天","单二","张二狗","赵宇","张丹","卢氏","张大大","刘云","吴先"]
+# lst = ["张无天","单二","张二狗","赵宇","张丹","卢氏","张大大","刘云","吴先"]
 # 临时列表
-temp = []
+# temp = []
 # for item in lst:
 #     if item.startswith("张"):
 #         lst.remove(item)
@@ -149,17 +153,17 @@ temp = []
 
         # 那我们该如何操作删除
         # 可以先建一个临时的列表，将要删除的内容记录下来
-for item in lst:
-    # 将要删除的内容记录下来，存储到另一个临时表中
-    # 然后我可以表与表之间对删？
-    if item.startswith("张"):
-        temp.append(item)
-
-for item in temp:
-    # 根据存储的表，一个一个的取出后进行删除
-    # remove删除的时字符元素，无需索引的
-    lst.remove(item)
-# 安全稳妥的方式：
-# 将要删除的内容存储到临时表中，然后循环新列表，逐个提取要删除的元素进行删除
-
-print(lst)
+# for item in lst:
+#     # 将要删除的内容记录下来，存储到另一个临时表中
+#     # 然后我可以表与表之间对删？
+#     if item.startswith("张"):
+#         temp.append(item)
+#
+# for item in temp:
+#     # 根据存储的表，一个一个的取出后进行删除
+#     # remove删除的时字符元素，无需索引的
+#     lst.remove(item)
+# # 安全稳妥的方式：
+# # 将要删除的内容存储到临时表中，然后循环新列表，逐个提取要删除的元素进行删除
+#
+# print(lst)

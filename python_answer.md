@@ -323,3 +323,41 @@ Windows 的 App Execution Alias 是 UWP/Store 应用的一种机制，让传统�
 - 临时存储：并非命名变量，也非特殊缓存，而是当前调用栈的求值栈（frame 的 value stack），仅在 print 调用期间持有该对象引用。
 - 消失时机：print 返回后栈槽弹出，引用计数归零，新列表立即被销毁（CPython 引用计数），并非等到程序结束。
 - 佐证：每次切片都是不同新对象（a is b → False）；无引用时对象即刻回收（__del__ 演示）。
+
+# Q32 栈（stack）与堆（heap）
+- 栈：函数调用栈，存函数帧（局部变量名、参数、返回地址、求值临时槽位）。LIFO，自动管理，函数返回即释放，速度快、空间有限。
+- 堆：存放所有 Python 对象的内存区域（dict/list/str/实例等）。空间大、寿命长，靠引用计数和 GC 回收。
+- 关系：栈里只存"名字/引用"，真正的对象在堆里。print(切片) 的临时新列表对象在堆中，仅在 print 调用期间被栈上的临时参数槽位引用；print 返回后槽位弹出，列表引用计数归零即被回收。
+
+# Q33 字典取单个 key / value
+- dic.keys() 返回的是 dict_keys 视图，不是列表，不支持索引。
+- 取单个 key（如第一个）：list(dic.keys())[0] 或 next(iter(dic))。
+- 用 key 取值（最常用）：dic['a'] 或 dic.get('a')；get 不存在时返回 None 不报错。
+- 取单个键值对：list(dic.items())[0] 或 next(iter(dic.items()))。
+- Python 3.7+ 字典保留插入顺序，但通常按 key 名访问，不按位置。
+
+# Q34 dict.items() 返回 (key, value) 元组是默认规定
+- dict.items() 的设计就是每次返回一个 (key, value) 元组，长度为 2（key 和 value 两部分）。
+- 这是方法固定语义，不是临时修改或自适应。
+- 对比：keys() 每次给单个 key，values() 每次给单个 value，items() 每次给元组。
+- 推荐用元组拆包：for key, value in dic.items():，直接拿到 key 和 value。
+
+# Q35 嵌套字典报错原因
+- 错误原因："sex": "男" 后面缺少逗号，导致 Python 无法解析下一个键值对 "hobby": {...}。
+- 字典中每个键值对之间必须用逗号分隔；Python 读到 "男" 后期望 } 或 ,，却遇到了 "hobby"，报 SyntaxError。
+- 修复：在 "sex": "男" 后添加逗号。
+- 建议：字典最后一项也保留尾随逗号，方便后续添加键值对时避免漏逗号。
+
+# Q36 KeyError: 'game' 原因与修复
+- 报错类型：KeyError: 'game'，表示字典 dic 中不存在键 'game'。
+- 原因：'game' 不在 dic 第一层，而是嵌套在 'hobby' 下面。结构为 dic → hobby → game → game_name1。
+- 修复：逐层访问 dic["hobby"]["game"]["game_name1"]。
+- 注意：不要用 str 作为变量名，会覆盖 Python 内置的 str 类型。
+
+# Q37 字典迭代时删除报错原因与解决
+- 报错：RuntimeError: dictionary changed size during iteration。
+- 原因：字典迭代器维护内部游标，边循环边删会改变字典大小/结构，导致游标失效；Python 禁止该行为。
+- del dic[key] 与 dic.pop(key) 在直接迭代时都会触发同样错误。
+- 解决 1：遍历快照 list(dic.keys())，再删除原字典。
+- 解决 2：先收集要删的 key 列表，循环结束后再统一删除。
+- 解决 3：字典推导式重建新字典（最 Pythonic）。
