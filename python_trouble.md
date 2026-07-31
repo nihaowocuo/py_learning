@@ -107,3 +107,21 @@ python 解释器与 python 环境是什么关系，没有 python 解释器，是
 
 # Q37 为何一边循环一边删除字典会报错
 问题：for key in dic: if key.startswith("魔"): print(key) 此删除会报错 dictionary changed size during iteration，那我该如何删除呢？
+
+# Q38 open 函数带 encoding 参数出现黄色警告
+问题：open("文本测试.txt","r",encoding="utf-8") 出现什么问题？
+
+# Q39 open() 报 unexpected keyword argument 'endoding'
+问题：open("文本测试.txt", mode="r", endoding="utf-8") 运行报错，这是什么意思？
+
+# Q40 Python 变量为何可以重复使用
+问题：py 中变量为何可以重复使用，有两个 line 且并未报错？
+
+# Q41 为何不能在 print 函数外添加 strip 方法
+问题：我为何不能再 print 函数外再添加 strip 方法？（print(line).strip() 报错）
+
+# Q42 如何只循环文件中的指定行
+问题：for line in f 会直接全部循环出来，但我想要只进行循环指定的行呢，该如何做？
+
+# Q43 如何在 for line in f 基础上只循环指定行（f(1,3) 为何不行）
+问题：在此基础上修改，同时告诉我，你给的方案都是什么，需要导入包？（用户尝试写 for line in f(1,3)）

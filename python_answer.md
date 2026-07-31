@@ -361,3 +361,43 @@ Windows 的 App Execution Alias 是 UWP/Store 应用的一种机制，让传统�
 - 解决 1：遍历快照 list(dic.keys())，再删除原字典。
 - 解决 2：先收集要删的 key 列表，循环结束后再统一删除。
 - 解决 3：字典推导式重建新字典（最 Pythonic）。
+
+# Q38 open() 的 PyCharm 误报与正确写法
+- 警告性质：PyCharm 静态类型检查误报，不是 Python 运行错误；代码可正常执行。
+- 原因：open() 有多个重载签名，PyCharm 未能精确推断当前是文本模式，误判 encoding 可能不被某些签名接受。
+- 更关键问题：open 后未关闭文件，会造成资源泄漏。
+- 推荐写法：使用 with open(...) as f:，自动关闭文件、异常安全，且通常能消除误报。
+- 若警告仍在：可忽略/Suppress inspection。
+
+# Q39 open() 参数名拼写错误
+- 报错：TypeError: open() got an unexpected keyword argument 'endoding'. Did you mean 'encoding'?
+- 原因：参数名 endoding 拼写错误，正确参数名为 encoding。
+- Python 关键字参数必须严格匹配函数定义的参数名，拼错即报 TypeError。
+- 修正：encoding="utf-8"；推荐配合 with 语句自动关闭文件。
+
+# Q40 Python 变量是名字/引用，可重复绑定
+- Python 变量不是固定存储盒，而是对象的名字（引用/标签）。
+- line = f.readline() 让 line 指向一个字符串对象；再次 line = f.readline() 让 line 改指向新对象，旧对象失去引用后被回收。
+- Python 无需声明变量类型或提前声明变量存在，赋值即创建/重新绑定，因此同名变量可反复使用且不报错。
+- 附带：readline() 保留行尾 \n，print() 又自动加换行，导致输出多空一行；可用 line.strip() 或 print(line, end="") 解决。
+
+# Q41 print(line).strip() 报错原因
+- 正确顺序：print(line.strip()) → 先对字符串 line 调用 .strip()，返回新字符串后再传给 print 打印。
+- 错误顺序：print(line).strip() → 先执行 print(line)，print 返回 None；再对 None 调用 .strip()，报 AttributeError: 'NoneType' object has no attribute 'strip'。
+- 方法必须挂在拥有该方法的对象上；字符串有 .strip()，None 没有。
+
+# Q42 只循环文件指定行的方法
+- 默认 for line in f 会遍历整个文件；要限制范围需额外控制。
+- 方法 1：itertools.islice(f, N) 只取前 N 行。
+- 方法 2：islice(f, start, stop) 取指定行号范围（左闭右开，从 0 计数）。
+- 方法 3：enumerate(f, start=1) 获取行号，配合 if 判断处理指定行。
+- 方法 4：按内容条件过滤，如 if "xxx" in line:。
+- 注意：文件对象只能顺序读一次；islice 停止后指针已移动，想再读需重新 open。文件不大时也可用 f.readlines() 转成列表再切片，但大文件不推荐。
+
+# Q43 文件对象不能调用，及四种指定行循环方案
+- f(1,3) 报错原因：f 是 open() 返回的文件对象（_io.TextIOWrapper），不是函数，不可调用；TypeError: '_io.TextIOWrapper' object is not callable。
+- 方案 A（推荐）：itertools.islice(f, start, stop) —— 需导包 from itertools import islice；内存友好，大文件适用。
+- 方案 B（常用）：enumerate(f, start=1) 配合 if —— 无需导包；适合按行号做复杂判断。
+- 方案 C：f.readlines() 后列表切片 —— 无需导包；小文件可用，大文件占内存。
+- 方案 D：手动计数器 count —— 无需导包；最基础但不推荐。
+- 推荐：按行号范围取行用 islice；按行号条件处理用 enumerate。

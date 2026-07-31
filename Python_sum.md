@@ -182,3 +182,27 @@ cat >> "E:/py_learning/.workbuddy/memory/2026-07-26.md" <<'EOF'
 ## Q37 为何一边循环一边删除字典会报错？
 **问**：`for key in dic:` 中根据条件删除 key，为何报 `dictionary changed size during iteration`？
 **答**：字典迭代器依赖内部游标，删除键会改变字典大小/结构导致游标失效，`del` 和 `pop` 都会触发。解决：遍历 `list(dic.keys())` 快照、先收集再删除、或用字典推导式重建新字典。
+
+## Q38 open 带 encoding 为何报黄线？
+**问**：`open("文本测试.txt","r",encoding="utf-8")` 出现什么问题？
+**答**：PyCharm 静态类型检查误报（open 重载多，IDE 未精确推断文本模式），代码可正常运行。更应注意 open 后未关闭文件，推荐 `with open(...) as f:` 自动关闭。若黄线仍在可忽略。
+
+## Q39 open() 报 unexpected keyword argument 'endoding'
+**问**：`open(..., endoding="utf-8")` 运行报错是什么意思？
+**答**：参数名拼写错误，正确应为 `encoding="utf-8"`。Python 关键字参数必须严格匹配，拼错会报 TypeError；错误信息已提示 Did you mean 'encoding'。修正后建议用 `with open(...) as f:` 自动关闭文件。
+
+## Q40 Python 变量为何可以重复使用？
+**问**：代码中两次使用 `line = f.readline()`，为什么不会报错？
+**答**：Python 变量是对象的名字/引用，不是固定存储盒。`line` 第一次指向第一行字符串，第二次改指向第二行字符串；旧对象失去引用后被回收，所以不会报错。Python 无需声明变量。顺带 `readline()` 保留行尾 `\n`，`print()` 再加一个换行，会输出空行，可用 `strip()` 或 `end=""` 消除。
+
+## Q41 为何不能在 print 函数外添加 strip 方法？
+**问**：为什么不能写 `print(line).strip()`，只能写 `print(line.strip())`？
+**答**：执行顺序不同。`print(line.strip())` 先对字符串调用 `.strip()`，再把结果给 `print`；`print(line).strip()` 先执行 `print`（返回 `None`），再对 `None` 调用 `.strip()`，因此报 `AttributeError: 'NoneType' object has no attribute 'strip'`。方法必须挂在有该方法的对象上。
+
+## Q42 如何只循环文件中的指定行？
+**问**：`for line in f` 会遍历所有行，如何只循环指定行？
+**答**：可通过 `itertools.islice(f, N)` 取前 N 行、`islice(f, start, stop)` 取行号范围、`enumerate(f, start=1)` 配合 if 按行号过滤，或按内容条件过滤。文件对象只能顺序读一次，islice 停止后需重新 open 才能再读；小文件也可用 `readlines()` 转列表后切片。
+
+## Q43 如何在 `for line in f` 基础上只循环指定行？
+**问**：想只循环指定行，写 `for line in f(1, 3):` 为何不行？有哪些方案、各需不需要导包？
+**答**：`f` 是文件对象，不是函数，不可调用，会报 `TypeError`。可行方案：① `itertools.islice(f, start, stop)`（需导包，推荐，内存友好）；② `enumerate(f, start=1)` 配合 `if`（无需导包，最常用）；③ `f.readlines()` 后列表切片（无需导包，小文件可用）；④ 手动计数器（无需导包，不推荐）。
