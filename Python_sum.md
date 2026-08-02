@@ -270,3 +270,7 @@ cat >> "E:/py_learning/.workbuddy/memory/2026-07-26.md" <<'EOF'
 ## Q59
 问：代码为何报 FileNotFoundError: '名单'？
 答：代码里 open("名单") 与实际文件名 `名单.txt` 不匹配，缺扩展名。应改为 `名单.txt`。另有隐藏 bug：`line.replace("张","周")` 未赋值给 line，修改不会生效，需写 `line = line.replace(...)`。若最终覆盖原文件，末尾用 os.replace。
+
+## Q60
+问：Word 改一个字后保存就是 read→modify→write temp→replace？另存为是源和新都在？
+答：对。保存=内存改→写临时文件→原子替换原文件（同你学的模式），保存后磁盘仍是 1 个文件（被替换）。.docx 是压缩包，改一字要重写整篇，不是改单字节。另存为=新路径写当前内容、源文件保留，故源与新同时存在（2 个）。
