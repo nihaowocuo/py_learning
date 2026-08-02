@@ -125,3 +125,51 @@ python 解释器与 python 环境是什么关系，没有 python 解释器，是
 
 # Q43 如何在 for line in f 基础上只循环指定行（f(1,3) 为何不行）
 问题：在此基础上修改，同时告诉我，你给的方案都是什么，需要导入包？（用户尝试写 for line in f(1,3)）
+
+# Q44 with 打开能读图片，f = open 打开的也能读吗
+问题：with 的形式打开的文件能读取图片，那使用 f = open 打开的呢？
+
+# Q45 如何跨文件/跨目录读取文件
+问题：我想跨文件读取该如何操作？
+
+# Q46 with 同时打开两个文件复制图片报错
+问题：我想完成文件的复制，使用 with open("../tou.png", mode="rb") as f1, \ open("./py_code/头像.png", mode="rb") as f2: 报错 invalid syntax，是什么原因？
+
+# Q47 复制图片时 FileNotFoundError: '../tou.png'
+问题：语法修正后运行报 FileNotFoundError: [Errno 2] No such file or directory: '../tou.png'，是什么原因？
+
+# Q48 直接运行脚本 open("tou.png") 仍报 FileNotFoundError
+问题：改成 D:\py\python.exe E:\py_learning\py_code\code_09_文件操作.py 运行后，open("tou.png", mode="rb") 仍报 FileNotFoundError: 'tou.png'，为何？
+
+# Q49 文件确实存在但 open 仍报 FileNotFoundError
+问题：当前文件夹（E:\py_learning）下明明有 tou.png，命令行运行脚本后仍报 FileNotFoundError: 'tou.png'，为什么？
+
+# Q50 相对路径基准点到底是什么？如何在 py_code 目录访问外层目录文件？
+问题：你此前告诉我相对路径的起始点是 py_learning，现在又说是当前工作目录 py_code，请详细解释，并给出我能在当前目录下访问外层目录的文件内容的方法。
+
+# Q51 是否必须把图片复制到 py_code 才能操作？
+问题：还是说我只能把图片复制到当前目录下 py_code，然后在通过命令将其打开并复制到当前目录下的另一个文件内？
+
+# Q52 能否在用户现有代码基础上修改？运行后 tou.png 为何被删除？
+问题：我能否不用你所给的操作，而是在我的基础上进行指导我修改？同时，运行程序后我在 py_learning 下的 tou.png 文件自动删除了，是什么原因？
+
+## Q53
+原因是否是，我使用 `with open("tou.png", mode="rb") as f1` 读取了文件内容，又使用 `open("py_code/头像.png",mode="wb") as f2` 以 w 模式打开，要正确写入新文件，但因中途出现未知错误未正常写入，文件又被打开所以被清理删除了？
+
+## Q54
+（图）在当前目录下我成功地执行了操作，为何此前跨目录执行操作失败？
+
+## Q55
+（图）教程中的就可以正常操作
+
+## Q56
+（图）我该如何判断当前的根目录，进而能正确的使用./与../等操作
+
+## Q57
+（图）哪进入下级目录呢？
+
+## Q58
+从源文件读取内容→修改→写入新文件→覆盖源文件（删源、改名）。问：这是否为文件操作的实质，若不正确请修改。
+
+## Q59
+（图）为何报错：FileNotFoundError: [Errno 2] No such file or directory: '名单'
