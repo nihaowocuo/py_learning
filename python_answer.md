@@ -541,3 +541,17 @@ Windows 的 App Execution Alias 是 UWP/Store 应用的一种机制，让传统�
 - "另存为"：在当前路径/新名写一份当前内容，源文件保留不动 → 此时源文件与新文件同时存在于磁盘（2 个）。之后活动的文档是新文件。
 - 文本编辑器（VS Code/Notepad++）也普遍用"写临时文件+替换"以避免写到一半崩溃损坏文件。
 - 关软件提示"是否保存"，是因为内存版本与磁盘版本不一致，不保存就丢失改动。
+
+## Q61
+- 目标：删除最近一次错误提交并重提。正确做法是用 `git reset --soft HEAD~1`（保留改动并暂存）或 `git reset --mixed HEAD~1`（保留改动但取消暂存）；不要用 `git revert`（revert 会新增一个“反向提交”，原错误提交仍留在历史里）。
+- 文件消失根因：`git revert` 会反转该提交在工作区的改动；若该提交新增了 code_10_函数.py，revert 会把它从工作区删除。随后的 `git reset --mixed` 只移动 HEAD、不动工作区文件，因此文件不会自动回来。
+- `git reset --mixed 1a5c03c` “无效果”：`--mixed` 不恢复工作区文件。恢复用 `git checkout HEAD -- <file>`（或 `git restore <file>`）。
+- 当前真实状态（已查）：HEAD 与 origin/main 都停在错误提交 1a5c03c，目标“删除错误提交”尚未达成——最后 reset 到了 1a5c03c 本身，等于又回到了错误提交上。
+- 正确收尾命令（未执行，供决定后运行）：
+  git reset --soft HEAD~1          # 撤销错误提交，改动保留在暂存区
+  # 修正附录/提交说明后：
+  git add .
+  git commit -m "正确说明"
+  git push --force-with-lease      # 因 1a5c03c 已推到远端，需强推（个人仓库可接受，先确认无人基于此提交）
+- 安全网：任何提交都不会立刻物理删除，`git reflog` 可找回（含 dangling 的 904879c revert 提交）；`git fsck --lost-found` 可找回悬空 blob。
+- 教训：想“撤销最近提交”用 reset，不是 revert；revert 用于已公开历史的安全撤销。

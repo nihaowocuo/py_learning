@@ -274,3 +274,7 @@ cat >> "E:/py_learning/.workbuddy/memory/2026-07-26.md" <<'EOF'
 ## Q60
 问：Word 改一个字后保存就是 read→modify→write temp→replace？另存为是源和新都在？
 答：对。保存=内存改→写临时文件→原子替换原文件（同你学的模式），保存后磁盘仍是 1 个文件（被替换）。.docx 是压缩包，改一字要重写整篇，不是改单字节。另存为=新路径写当前内容、源文件保留，故源与新同时存在（2 个）。
+
+## Q61
+问：git revert 后文件消失，git reset --mixed 找回无效，如何恢复并真正删除错误提交？
+答：文件消失因 `git revert` 反转了新增文件（code_10_函数.py）的改动将其从工作区删除；`--mixed` 不恢复工作区文件，用 `git checkout HEAD -- <file>` 找回。想删除错误提交用 `git reset --soft HEAD~1`（revert 只会新增反向提交、原提交仍在）。当前 HEAD 与远端都停在错误提交 1a5c03c，目标未达成；重提需 reset --soft HEAD~1 + 改内容 + commit + `git push --force-with-lease`（因已推送）。reflog/fsck 可兜底找回。
