@@ -278,3 +278,22 @@ cat >> "E:/py_learning/.workbuddy/memory/2026-07-26.md" <<'EOF'
 ## Q61
 问：git revert 后文件消失，git reset --mixed 找回无效，如何恢复并真正删除错误提交？
 答：文件消失因 `git revert` 反转了新增文件（code_10_函数.py）的改动将其从工作区删除；`--mixed` 不恢复工作区文件，用 `git checkout HEAD -- <file>` 找回。想删除错误提交用 `git reset --soft HEAD~1`（revert 只会新增反向提交、原提交仍在）。当前 HEAD 与远端都停在错误提交 1a5c03c，目标未达成；重提需 reset --soft HEAD~1 + 改内容 + commit + `git push --force-with-lease`（因已推送）。reflog/fsck 可兜底找回。
+
+## Q62
+问：print(a,b,c,*args,**kwargs) 为何报 TypeError: unexpected keyword argument 'hello'？
+答：`**kwargs` 解包把 {'hello':465,'haha':654} 变成关键字参数传给 print，而 print 只接受 sep/end/file/flush 四个关键字，不认 hello/haha。修复：打印字典用 `print(..., kwargs)`，或遍历 items；透传只能用 print 支持的键。
+
+
+## Q63
+问：教程 `def func(a,b,*args,c="哈哈",**kwargs): print(a,b,c,args,kwargs)` 正常打印，为何用户写法报错？
+答：两个差异：① 教程 c 在 *args 之后、是有默认值的 keyword-only 参数；用户 c 在前、必填。② 教程 print 不带 */**（args、kwargs 当对象打印），用户 print 加 **（kwargs 解包成关键字参数传给 print，print 只认 sep/end/file/flush，不认 hello/haha）。推荐 `print(a, b, *args, kwargs)`。
+
+
+## Q64
+问：func(1,2,haha=654) + print(a,b,c,*args,**kwargs) 为何报 TypeError: unexpected keyword argument 'haha'？
+答：根因同 Q62/Q63——**kwargs 解包把 haha 作为关键字参数传入 print，print 不认。另缺必填位置参数 c（调用只给 a,b）。修复：print 去掉 ** 改为打印 kwargs 对象，并补上 c=3。
+
+
+## Q65
+问：func(hello=456,haha=654,1,2,3,4) 报 SyntaxError: positional argument follows keyword argument，请总结实参与形参输入规律。
+答：Python 实参铁律——位置参数必须集中在前、关键字参数必须集中在后，不能穿插。形参定义顺序为：必填位置 → 默认值位置 → *args → keyword-only → **kwargs。实参绑定流程：位置按顺序绑必填、多余进 *args；关键字按名字匹配、剩余进 **kwargs；keyword-only 必须用关键字传。

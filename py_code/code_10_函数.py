@@ -146,8 +146,57 @@
 # c="哈哈",
 # c,
 # 3.
-def func(a,b,*args,**kwargs):
-    print(a, b,  *args, **kwargs)
-# 此处第三位，我传入的实参为数字，系统提示我，应为str，但是实际为int
-func(1,2,hello=465,haha=654)
+# def func(a,b,*args,c="哈哈",**kwargs):
+#     # 此处报错是因为，你在形参时需要表示动态传参加*
+#     # print(a, b, c, *args, **kwargs)
+#     print(a, b, c, args, kwargs)
 
+# 此处第三位，我传入的实参为数字，系统提示我，应为str，但是实际为int
+# 注意，此处c的默认值要生效，意味着在位置参数b之后不能有任何数据，关键字可以，是已经被锁定了，关键字，强制会传入**kwargs
+# 这样是会报错的,在实参中,位置参数在前,关键字参数在后
+# func(hello=456,haha=654,1,2,3,4)
+# func(1,2,3,4,hello=456,haha=654,)
+
+# 可以没有限制的接收任何参数
+# def fun2(*args,**kwargs):
+#     print(args)
+#     print(kwargs)
+
+# 补充:
+# stu_lst = ['诺亚','白来',"二清","扒鸡"]
+# def func(*args):
+#     print(args)
+
+# 接下来我想让列表中的每一项作为参数传给函数
+# func(stu_lst[0],stu_lst[1],stu_lst[2],stu_lst[3])
+# 但如果列表非常长呢
+# py中的特有语法
+# *在实参位置,把列表打散成位置参数进行传递
+# 我们把stu_lst中打散成位置参数一个个传递
+# 这样就会把列表打散成位置参数进行传递
+# 注意:这是*在实参的位置
+# func(*stu_lst)
+# 同理字典也可以此操作
+# **也可以把字典转成关键字参数进行传递
+
+# 5.函数的返回值:给调用方返回的结果
+#         关于return:
+#             1.如果函数内没有return,此时外界接收到的是啥,是none
+#             2.return加一个值，此为常用，外界可以接收到一个数据
+#             3.只写了return,后面不跟值,这意味着return是直接结束,return后函数立即停止,并返回内容,此时外界收到的为none
+#                 return是可以返回多个值的,这时候返回的是元组，存放了所有的返回值
+#                 例如return 1,2,3,4，就会出现元组
+# def jisuan(a,opt,b):
+#     if opt == '+':
+#         print(a+b)
+#         return a+b
+# # 需要一个变量存储返回的结果
+# resule = jisuan(2,"+",5)
+# 然后可以在对其进一步操作
+
+def jisuan(a,b):
+    print(a,b)
+    return
+    print(a+b)
+#     此可以发现在return之后的print并未打印
+jisuan(3,4)

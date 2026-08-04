@@ -555,3 +555,47 @@ Windows 的 App Execution Alias 是 UWP/Store 应用的一种机制，让传统�
   git push --force-with-lease      # 因 1a5c03c 已推到远端，需强推（个人仓库可接受，先确认无人基于此提交）
 - 安全网：任何提交都不会立刻物理删除，`git reflog` 可找回（含 dangling 的 904879c revert 提交）；`git fsck --lost-found` 可找回悬空 blob。
 - 教训：想“撤销最近提交”用 reset，不是 revert；revert 用于已公开历史的安全撤销。
+
+## Q62
+- 原因：`**kwargs` 解包后变成关键字参数传给 print。func 收到 kwargs={'hello':465,'haha':654}，`print(a,b,c,*args,**kwargs)` 等价于 `print(1,2,3,4,hello=465,haha=654)`。
+- `print()` 签名为 `print(*objects, sep=' ', end='\n', file=sys.stdout, flush=False)`，只接受 sep/end/file/flush 四个关键字名，不认识 hello/haha → TypeError。
+- 教训：`**kwargs` 解包会把字典变成“关键字参数”传进目标函数，目标函数必须接受这些名字；print 不接受任意关键字参数。
+- 修复（按意图选一）：
+  - 想把 kwargs 本身打印：print(a, b, c, *args, kwargs)（打印字典）
+  - 想逐项打印：for k, v in kwargs.items(): print(k, v)
+  - 若要透传给 print，只能用其支持的键（sep/end/file/flush），如 func(..., sep='|')
+
+
+## Q63
+- 教程能正常打印有 2 处差异，恰好绕开了 Q62 的坑：
+  1. 函数签名：教程 c 在 `*args` 之后，是带默认值的 keyword-only 参数；用户上一轮 c 在前，是必填位置参数。
+  2. print 调用：教程 `print(a, b, c, args, kwargs)` 中 args/kwargs 都没有 * 号，是作为普通对象传入；用户 `print(a, b, c, *args, **kwargs)` 中 `**kwargs` 会把字典解包成关键字参数，而 print 只认 sep/end/file/flush 四个关键字名，其它任意键名都报错。
+- print 签名：`print(*objects, sep=' ', end='\n', file=sys.stdout, flush=False)`，不认 hello/haha 这类任意键名。
+- keyword-only 参数：位置必须在 `*args` 之后、`**kwargs` 之前，只能用关键字调用。
+- 修复建议（推荐思路 A）：`print(a, b, *args, kwargs)`，`*args` 位置解包 OK、kwargs 当对象打印。
+- 思路 B：保持全解包，则 kwargs 里只能有 print 支持的键，如 `func(1,2,3,4, sep='|', end='!')`。
+
+
+## Q64
+- 根因与 Q62/Q63 一致：`**kwargs` 解包把 {'haha':654} 变成关键字参数传给 print，print 只认 sep/end/file/flush，不认 haha → TypeError。
+- 另有一个隐藏错误：调用 `func(1,2,haha=654)` 只提供了 a、b 两个位置参数，但签名中 c 是必填位置参数，未传值；即使去掉 **kwargs 也会先报 `missing 1 required positional argument: 'c'`。
+- 教训：`**字典` 解包=把字典变成关键字参数传给下一函数，下一函数必须认这些名字；print 不接受任意关键字名。
+- 修复（按意图选）：
+  - 只想打印收到内容：print(a, b, c, *args, kwargs)（kwargs 当对象）
+  - 遍历键值：for k,v in kwargs.items(): print(k, v)
+  - 透传给 print 只能用其支持的键，如 func(1,2,3, sep='|')
+- 调用需补上 c，如 func(1,2,3,haha=654)。
+
+
+## Q65
+- 报错原因：`func(hello=456, haha=654, 1, 2, 3, 4)` 把关键字参数写在前面、位置参数写在后面，违反 Python 语法 → SyntaxError: positional argument follows keyword argument。
+- Python 实参铁律：**位置参数必须集中在前，关键字参数必须集中在后，不能穿插**。
+- 形参定义顺序：`必填位置 → 默认值位置 → *args → keyword-only → **kwargs`。
+- 实参→形参流程：① 位置实参按顺序绑给必填形参；② 多余位置进 *args（元组）；③ 关键字实参按名字匹配，剩余进 **kwargs（字典）。
+- keyword-only 参数（位于 *args 之后、**kwargs 之前）：只能用关键字调用，不能按位置传。
+- 纠正用户注释两处：① "位置参数 b 之后不能有任何数据"是错的——b 之后可以再有位置数据（会进 *args）；② 真正禁止的是"关键字参数后再写位置参数"，用户说反了。
+- 速记表：
+  def f(a,b,c) → f(1,2,3) / f(c=3,b=2,a=1) / f(1,2,c=3)
+  def f(a,b,c,*args) → f(1,2,3,4,5)
+  def f(a,b,c,*args,**kwargs) → f(1,2,3,4,x=1,y=2)
+  def f(a,b,*args,c="X") → f(1,2,c="Y")；c 必须用关键字传

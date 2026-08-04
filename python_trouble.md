@@ -179,3 +179,29 @@ python 解释器与 python 环境是什么关系，没有 python 解释器，是
 
 ## Q61
 （git 操作）本次问题：我不小心把提交的附录内容写错了，然后使用了回滚提交（git revert），发现不符合预期——我想要的是删除此次错误提交、重新提交一遍。于是我进行了所谓的“回滚的混合式”（git reset --mixed），结果出现文件消失的情况，回收站也无此文件。我先执行了 `git reset --mixed 1a5c03c` 发现无效果，又执行 `git checkout HEAD -- py_code/code_10_函数.py` 最终找回文件。问题起因：我想在提交附录中加入今天解决的“vscode 中文输入时中文无法正常显示（只显示英文字母，不显示中文）”这一问题的解决方案。
+
+## Q62
+运行 code_10_函数.py 报错：
+TypeError: print() got an unexpected keyword argument 'hello'
+代码：
+func(1,2,3,4,hello=465,haha=654)
+def func(a, b, c, *args, **kwargs):
+    print(a, b, c, *args, **kwargs)
+
+
+## Q63
+（图）教程中 `def func(a, b, *args, c="哈哈", **kwargs): print(a, b, c, args, kwargs)` 加 `func(1,2,3,4, c="呵呵", hello=456, haha=654)` 能正常打印 1 2 呵呵 (3, 4) {'hello': 456, 'haha': 654}。问：为何教程能正常打印？
+
+
+## Q64
+运行 code_10_函数.py 报错：
+TypeError: print() got an unexpected keyword argument 'haha'
+代码：
+func(1, 2, haha=654)
+def func(a, b, c, *args, **kwargs):
+    print(a, b, c, *args, **kwargs)
+
+
+## Q65
+（图）调用 `func(hello=456, haha=654, 1, 2, 3, 4)` 报 SyntaxError: positional argument follows keyword argument。请总结实参与形参的输入规律。
+用户注释："此处第三位我传入实参为数字，系统提示应为str但实际为int"；"注意，此处的默认值要生效，意味着在位置参数 b 之后不能有任何数据，关键字可以，是已经被锁定了，关键字，强制会传入 **kwargs"。
