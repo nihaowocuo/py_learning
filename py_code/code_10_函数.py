@@ -183,9 +183,10 @@
 #         关于return:
 #             1.如果函数内没有return,此时外界接收到的是啥,是none
 #             2.return加一个值，此为常用，外界可以接收到一个数据
-#             3.只写了return,后面不跟值,这意味着return是直接结束,return后函数立即停止,并返回内容,此时外界收到的为none
-#                 return是可以返回多个值的,这时候返回的是元组，存放了所有的返回值
-#                 例如return 1,2,3,4，就会出现元组
+#             3.只写了return,后面不跟值,这意味着return是直接结束,return后函数立即停止,并返回内容,
+#               此时外界收到的为none
+#               return是可以返回多个值的,这时候返回的是元组，存放了所有的返回值
+#               例如return 1,2,3,4，就会出现元组
 # def jisuan(a,opt,b):
 #     if opt == '+':
 #         print(a+b)
@@ -194,9 +195,77 @@
 # resule = jisuan(2,"+",5)
 # 然后可以在对其进一步操作
 
-def jisuan(a,b):
-    print(a,b)
-    return
-    print(a+b)
-#     此可以发现在return之后的print并未打印
-jisuan(3,4)
+# def jisuan(a,b):
+#     print(a,b)
+#     return
+#     print(a+b)
+# 此可以发现在return之后的print并未打印
+# 实际上就是会直接结束中断
+# jisuan(3,4)
+
+# 可以看到返回的内容是元组
+# def fanhui():
+#     return 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+#
+# result = fanhui()
+# print(result)
+
+# 内置函数：可直接拿来用，无需你定义的（也就是说事前准备好的）
+# py中自带的
+# 例如:
+# print("你好世界！")
+
+# 基本数据类型
+    # s = "123"
+    # i = int(s)
+    # b = bool(s)
+    # f = float(s)
+    # complex 复数，实部加虚部。i**2 = -1 i的平方等于-1
+
+# 进制转换类：
+    # bin2进制，oct8进制，hex16进制
+    # a = 18
+    # print(bin(a))
+    # print(oct(a))
+    # print(hex(a))
+    # a = 0b10010
+    # print(int(a)) # 转十进制
+
+# 数学运算类：
+    # sum,min,max,pow
+    # a = 10
+    # b = 3
+    # # 此为10的3次方
+    # print(pow(a,b))
+    # # 这个表示的是次方
+    # # 10的3次方
+    # print(a ** b)
+    #
+    # sum
+    # lst = [12,45,65,58,132]
+    # print(max(lst))
+    # print(min(lst))
+    # print(sum(lst))
+
+# 与数据结构相关：
+    # list,把你传入的东西转为列表
+    # s = {1,2,3,4,5}
+    # # list他是如何转换放入的，
+    # # lst = list(s)
+    # # 此时你会发现是单个字符存入
+    # lst = list("你好啊")
+    # # 所以其实际逻辑是循环放入
+    # # 类似这种操作，循环一个装入一个
+    # # for item in s:
+    # #     lst.append(item)
+    # print(lst)
+    #
+    # tuple,是变为元组
+
+# 相关内置函数：
+# reversed(),翻转，把整个列表翻过来，最大放到最小
+# slice(),作用是切片
+# 例如这个[1:4:2]
+# 从一到四每三个出来一个
+# result = slice(1,4,2)
+# print("啊啊啊啊啊啊啊啊啊啊"[result])
