@@ -297,3 +297,23 @@ cat >> "E:/py_learning/.workbuddy/memory/2026-07-26.md" <<'EOF'
 ## Q65
 问：func(hello=456,haha=654,1,2,3,4) 报 SyntaxError: positional argument follows keyword argument，请总结实参与形参输入规律。
 答：Python 实参铁律——位置参数必须集中在前、关键字参数必须集中在后，不能穿插。形参定义顺序为：必填位置 → 默认值位置 → *args → keyword-only → **kwargs。实参绑定流程：位置按顺序绑必填、多余进 *args；关键字按名字匹配、剩余进 **kwargs；keyword-only 必须用关键字传。
+
+
+## Q66
+问：ord 是否取字符编码，chr 是否把编码转字符？
+答：方向对。ord 取 Unicode 码点（整数），chr 把码点转字符，二者互逆。但严格说 ord 不是"编码"，编码指字符↔字节序列（用 encode/decode）。ord 只返回整数码点。
+
+
+## Q67
+问：VS Code 运行输出处为何没有搜索功能？
+答：当前是"运行/输出"面板，搜索支持受限；应切换到"终端"面板（Ctrl+` 新建终端），在终端里运行脚本后按 Ctrl+F 搜索。另建议 range(65536) 输出过多控制字符会卡终端，可缩小范围测试。
+
+
+## Q68
+问：终端中 `py code_10_函数` 报 No such file，该如何运行？
+答：文件名缺 `.py` 扩展名。Python 不会自动补扩展名，应写 `py code_10_函数.py` 或 `python code_10_函数.py`。当前 cwd 已在 py_code，无需路径。
+
+
+## Q69
+问：`for i in range(65536): print(chr(i)+" ", end="")` 为何看起来没全部打印？
+答：代码确实执行了 65536 次，但 0-65535 包含大量控制/不可见字符（\n/\r/\b/\t 等），会换行、回车、退格或显示为空白，导致终端看起来没打印完或显示混乱。应只打印可见范围（32-127 或 19968-40870）或用 `isprintable()` 过滤。

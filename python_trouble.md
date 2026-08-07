@@ -205,3 +205,19 @@ def func(a, b, c, *args, **kwargs):
 ## Q65
 （图）调用 `func(hello=456, haha=654, 1, 2, 3, 4)` 报 SyntaxError: positional argument follows keyword argument。请总结实参与形参的输入规律。
 用户注释："此处第三位我传入实参为数字，系统提示应为str但实际为int"；"注意，此处的默认值要生效，意味着在位置参数 b 之后不能有任何数据，关键字可以，是已经被锁定了，关键字，强制会传入 **kwargs"。
+
+
+## Q66
+（图）`ord` 是否为提取字符的编码，而 `chr` 则是将编码转为字符？代码注释："在 py 内存中所使用的时 unicode 编码"；"汉字在其中是有编码的，可以通过 ord 取到此字的编码"；"给出编码位置，我将其变为汉字"；`print(chr(ord(a)))`。
+
+
+## Q67
+（图）VS Code 运行面板输出大量字符后，问：为何终端运行处没有搜寻（搜索）功能？
+
+
+## Q68
+（图）在 VS Code 终端中输入 `py code_10_函数` 运行，报 `can't open file '...\code_10_函数': [Errno 2] No such file or directory`。问：该如何运行？
+
+
+## Q69
+（图）运行 `for i in range(65536): print(chr(i)+" ", end="")` 后，终端只显示部分字符（ASCII 可见字符），后面大量空白/方块。问：为何未进行全部打印？
