@@ -221,3 +221,62 @@ def func(a, b, c, *args, **kwargs):
 
 ## Q69
 （图）运行 `for i in range(65536): print(chr(i)+" ", end="")` 后，终端只显示部分字符（ASCII 可见字符），后面大量空白/方块。问：为何未进行全部打印？
+
+
+## Q70
+（图）在 VS Code 的 PowerShell 终端中直接输入 `help(str)`，报：
+`help : 无法将“str”项识别为 cmdlet、函数、脚本文件或可运行程序的名称...`
+以及 `ObjectNotFound: (str:String) [], CommandNotFoundException`。问：为何报错？
+
+
+## Q71
+（图）代码：
+```python
+def fun1(*args):
+    print("hello")
+def fun2():
+    print("hi")
+print(fun1(fun2))
+print(fun1(fun2()))
+```
+运行后输出：hello / None / hi / hello / None。问：为何会打印出 None？
+
+
+## Q72
+（图）问以下代码的运行顺序：
+```python
+def fun1(*args):
+    return "hello"
+def fun2():
+    fun1()
+print(fun1(fun2()))
+```
+
+
+## Q73
+问：`print(fun1(fun2))` 与 `print(fun1(fun2()))` 的区别。
+
+
+## Q74
+确认性问题：fun2() 是否代表调用并取得返回值再传入 fun1，而直接写 fun2 是传入函数对象本身？
+
+
+## Q75
+（概念归纳）用户总结：
+1. 函数可以作为返回值返回
+2. 函数可以作为参数相互传递
+3. 函数名实际也是一个变量名，本质上都表示了一个内存地址
+问：以上三点是否正确？
+
+
+## Q76
+变量所存储的是该数据存放的起始位置，还是说也只是一个索引位置？
+（追问：结合 Q75“函数名即变量指向内存地址”的说法，变量到底存的是地址还是索引）
+
+
+## Q77
+（追问 Q76）变量所存储的，就是真实内存地址的首位？
+
+
+## Q78
+（追问 Q77）也就是变量所指向的也是一个“封装后的东西”？并不是直接指向具体的数据？

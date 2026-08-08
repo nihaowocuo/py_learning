@@ -303,3 +303,39 @@
 
 # enumerate:
 # all,any
+# 把all当作and来看
+# t and t and t
+# print(all([12,"河洛","阿七"]))
+# f and f and true
+# print(all([0,"","阿七"]))
+# any:当作or来看，只要内部不为空，或者说有一项不空即为true
+# print(any([0,"",'阿七']))
+lst = ["张无忌","张翠山","张允","罗以"]
+# enumerate可以直接拿到索引和
+# for item in enumerate(lst):
+#     # print(type(item))
+#     print(item)
+# 也可更改index，
+# for index, item in enumerate(lst):
+#     # print(type(item))
+#     print(index,item)
+# 数据依旧从零开始，但其被赋予的索引从2开始
+# for index, item in enumerate(lst,2):
+#     # print(type(item))
+#     print(index,item)
+
+# for i in range(0,len(lst)):
+#     print(i,lst[i])
+
+s = "你好啊"
+# 算出来的一定是一个数字->想办法转换为内存地址，然后进行数据的存储 -> 字典(集合)哈希表
+# print(hash(s))
+#
+# # id直接算你字符串存哪了，直接拿到内存地址
+# print(id(s))
+#
+# # 返回了源码，但在pycharm中直接ctrl+选中的，即可直接查看
+# print(help(str))
+
+# dir是在告诉你，当前类型的变量能够执行的操作
+print(dir(s))
