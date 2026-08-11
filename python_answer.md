@@ -777,3 +777,181 @@ Windows 的 App Execution Alias 是 UWP/Store 应用的一种机制，让传统�
   1. 单个对象层面：数据被包进 PyObject（头+负载）。
   2. 语言层面：变量与对象解耦——名字只是引用，同一对象可被多个名字引用（引用计数管理生命周期）。
 - 结论：你的理解正确——Python 里没有“裸数据”，一切皆对象，变量指向的永远是封装后的对象，具体数据藏在对象内部。
+
+
+## Q79
+- 对，装饰器本质就是“一个接收函数、返回函数的函数（callable）”。它正是 Q75 讲的“函数作参数 + 函数作返回值”的典型应用。
+- `@deco` 语法糖等价于：`原函数 = deco(原函数)`。装饰器接收原函数对象，返回一个新的 wrapper 函数去替换它。
+- 作用：在不改动原函数代码的前提下，给原函数“包”上额外行为（前置、后置、环绕）。这就是“开闭原则”/横切关注点（日志、计时、权限、缓存等）。
+- 用户的“外挂”类比非常贴切：装饰器 = 包装层，wrapper 内部在调用原函数之前做“打开外挂”（前置），之后做“关闭外挂”（后置），原函数在中间照常运行。
+- 关键时序：
+  - 装饰器 `deco(func)` 在“定义时”执行一次，产出一个 wrapper；此后名字绑定到 wrapper。
+  - 之后每次调用该名字，执行的是 wrapper 的函数体 → 前置→原函数→后置，因此“打开/关闭外挂”发生在每一次调用，而不仅是一次。
+- 代码示例（贴合类比）：
+  def wai_gua(func):
+      def wrapper(*args, **kwargs):
+          print("打开外挂")          # 前置
+          result = func(*args, **kwargs)  # 调用原函数（打游戏）
+          print("关闭外挂")          # 后置
+          return result
+      return wrapper
+
+  @wai_gua
+  def play_game():
+      print("正在打游戏")
+
+  play_game()
+  # 输出：
+  # 打开外挂
+  # 正在打游戏
+  # 关闭外挂
+- 真实常见用途：计时（time）、日志、权限校验、@lru_cache 缓存、事务/连接管理（open/close）、路由注册等。
+- 进阶：可叠加多个装饰器（从下往上包）；带参数的装饰器需再包一层“工厂函数”。
+- 结论：你的理解正确——装饰器是用“函数包裹函数”来无侵入地注入前置/后置逻辑的机制；“外挂”比喻正好抓住了“环绕执行”的核心。
+
+
+## Q80
+- 关键前提：Python 里**函数名和变量名共用同一个命名空间**，没有“函数专区”和“变量专区”之分。名字只是“名字→对象”的绑定，函数对象和整数对象在命名空间里是平级的。
+- ① 同一作用域内同名：后写的覆盖先写的（后者胜）。例如先 `def greet():...` 再 `greet = 123`，此时 `greet` 绑定整数，原函数的名字被顶掉；再 `greet()` 会报 `TypeError: 'int' object is not callable`（已实测）。
+- ② 跨作用域：局部名会“遮蔽”同名全局名。函数内若 `outer = 5`，则该函数内 `outer` 指向 5，全局的 `outer` 函数被遮蔽（已实测 test() 返回 5）。
+- ③ 最危险的坑——UnboundLocalError：函数体内只要**有**对某个名字的赋值，Python 就把该名视为整个函数的**局部变量**；若在赋值前读取它，会报 `UnboundLocalError: cannot access local variable 'x' where it is not associated with a value`（已实测）。这常被误以为“全局变量和局部变量冲突”，本质是该名被判定为局部、却在使用前未赋值。
+  - 解决：想在函数内修改全局变量，用 `global x` 声明；只读不赋值则无需声明（直接读到全局）。
+- 结论：同名不会“语法冲突报错”，但会发生“覆盖/遮蔽/未绑定”三种运行时行为。最佳实践：函数名与变量名不要取一样，避免混淆与坑。
+- 实测输出摘要：
+  - greet=123 后 greet() → TypeError: 'int' object is not callable
+  - 局部 outer=5 遮蔽全局函数，test() 返回 5
+  - 函数内先 print(x) 后 x=20（x 为全局 10）→ 调用报 UnboundLocalError
+
+
+## Q81
+- 本质原因：C 的 `int` 是“裸原始数据”，Python 的 `int` 是“堆上的完整对象”（呼应 Q78 的“封装”）。两者的内存模型完全不同。
+- C 的 `int c = 12;`：
+  - `c` 在栈上就是 4 字节原始二进制位，类型由编译期声明固定，无任何运行期元数据。
+  - 变量本身 = 数据本身，没有指针、没有对象头，直接读写这 4 字节。
+- Python 的 `x = 42`：
+  - `x` 是一个名字，绑定到一个堆上分配的 int 对象（引用，额外占 8 字节指针）。
+  - int 对象内部布局（64 位 CPython）：对象头（引用计数 8 + 类型指针 8）+ 实际数值字段 8 ≈ 24，再按 8 字节对齐 → 实测 sys.getsizeof(42)=28 字节。
+  - 也就是说：28 字节里只有约 8 字节是“真正的数值”，其余 ~20 字节全是簿记开销。
+- 为什么 Python 非要这些开销？三个硬需求：
+  1. 动态类型：解释器必须在运行期知道“这是 int”，所以对象要带 `ob_type` 类型指针；C 的类型在编译期就定死了，对象不需要自己带。
+  2. 内存管理：引用计数（`ob_refcnt`）+ 堆分配，需要头部记录，才能自动回收。
+  3. 任意精度：Python int 永不发生溢出，哪怕 2**1000 也行——实测 sys.getsizeof(2**1000)=160 字节。即便小整数也用同一套“大整数”机制，数值字段本身用的是比 C int 更宽的 C long（8 字节）。
+- 总账：Python 里“一个整数” ≈ 名字引用 8 字节 + 对象 28 字节 ≈ 36 字节，对比 C 的 4 字节，约 9 倍。
+- 补充：小整数（-5~256）被解释器缓存复用（实测 id(42) is id(42) 为 True），但对象本身仍是 28 字节，只是多个名字共享同一份。
+- 一句话：C 把整数当“值”直接存；Python 把整数当“对象”管理，对象头（类型+计数）+ 更宽的数值字段 + 堆分配，使 4 字节膨胀到 28 字节。
+
+
+## Q82
+- 对。int 是 `class 'int'`（类），42 是它的实例（对象）；实例同时携带数据属性与操作方法，正是"封装/对象"的本质，也正是 OOP 的核心（对象=数据+操作）。
+- Python 层可见（已实测）：
+  - 数据属性：real, imag, numerator, denominator。例 42.real=42, 42.imag=0, 42.numerator=42, 42.denominator=1。
+  - 方法：bit_length(), to_bytes(), from_bytes(), conjugate(), is_integer(), as_integer_ratio() 等。例 42.bit_length()=6。
+  - dunder 方法 63 个：运算符 + - * == < 等本质是实例方法 __add__/__mul__/__eq__ 等。例 3+4 == 3.__add__(4) == 7。
+- 必须区分两层（易混）：
+  - Python 层：class int 定义的"接口"（属性+方法），代码直接可用。
+  - CPython 实现层：底层 C 结构体 PyLongObject，含 ob_refcnt（引用计数）、ob_type（类型指针）、ob_size、ob_digit[]（真实数值）。这些不是 Python 属性（写 42.ob_refcnt 会 AttributeError），需 sys.getrefcount()/type() 间接看；正是 Q81 说的 28 字节对象头的来源。
+- 结论：Q75–Q81 的"变量指向 28 字节堆对象"与本问"int 是带属性方法的类实例"是同一对象的两面——底层是带元数据头的封装体，上层暴露成可调用方法的对象。
+
+
+## Q83
+- 是闭包。`inner` 函数体引用了外层 `guanjia` 的局部变量 `game`，因此被返回后仍持有该函数对象，不会被释放——这就是闭包保存局部变量的本质。
+- 定义 `inner` 时**不会执行** `inner` 的函数体，所以 `game()` 在 `def inner():` 阶段不会执行。函数体只在该函数被调用时执行。
+- 实测时序：
+  1. `play_dnf = guanjia(play_dnf)`：传入原始 `play_dnf` 函数对象；`guanjia` 内定义 `inner` 并返回；名字 `play_dnf` 重新绑定到 `inner`。此阶段只输出"guanjia 被调用/inner 已定义"，不会输出"打开外挂/你好啊/关闭外挂"。
+  2. `play_dnf()`：执行 `inner` 体 → "打开外挂" → 调用 `game()`（即原始 `play_dnf`）→ "你好啊，我叫赛利亚" → "关闭外挂"。
+- 名字遮蔽不影响闭包：赋值后名字 `play_dnf` 指向 `inner`，但 `inner` 内部闭包保存的是传入时的**原始函数对象**，不是名字。
+- 等价写法：`@guanjia` 装饰器就是 `play_dnf = guanjia(play_dnf)` 的语法糖。
+
+
+## Q84
+- x 是一个"名字（变量名/标识符）"，存在于当前命名空间（如全局命名空间 globals() 字典）里；它本身不是对象。
+- x 这个名字对应的"值"是 42 这个 int 对象的地址（引用）——即 x 绑定到 42。这与 Q76/Q77 一致：变量存的是对象内存起始地址。
+- 因此：42 是对象（有类型、有方法、占 28 字节、在堆上）；x 是"指向 42 的标签/引用"，通过 x 才能访问到 42。
+- 多个名字可指向同一对象：`y = x` 后 `y is x` 为 True（已实测）。
+- type(x) 返回 int：type() 看的是 x 所指向对象的类型，x 作为名字本身没有"类型"这一说。
+- x = 43 是让名字 x 重新绑定到 43 这个对象，原 42 对象仍在（y 仍=42，已实测）。
+- 小整数缓存：-5~256 的整数全局复用，故 id(x) == id(42) 为 True（CPython 实现细节，勿依赖）。
+- 注意：`x is 42` 这类写法会触发 SyntaxWarning（is 比较整数字面量）；`is` 只适用于 None/True/False 或判断"同一对象"，比较值请用 `==`。
+
+
+## Q85
+- 前半句对：CPython 中 x 存储的是 42 这个对象的地址（引用），不是对象本身的内容。
+- 后半句需纠正："对象就是类的实例"这个 OOP 定义在 Python 和 C++ 里都成立——42 是 int 类的实例，它本身就是一个对象。区别在于"变量如何持有对象"：
+  - Python（引用语义）：变量永远持有"指向对象的引用（地址）"，不直接持有对象本体。x 不是对象，只是标签。
+  - C/C++ 值语义：变量可以直接持有对象本体。如 C++ `MyClass obj;` 的 obj 本身就是那个类实例（在栈/全局区，不通过地址间接）；`int x = 42;` 的 x 直接存值 42（4 字节）。C 语言没有"类"（那是 C++），但有结构体，结构体变量直接存内容。
+- 关键差异：Python 一切变量都是"引用"，C/C++ 变量可以是"值本身"。所以 Python 里"x 是地址、42 才是对象"；C++ 里栈上 `obj` "就是对象本体"。
+- 引用语义实证（已实测）：`a = b = [1,2,3]` 后 a is b 为 True，a.append(99) 后 b 也变成 [1,2,3,99] —— 证明 a/b 都只持有引用，不持有列表本体。这正是 Python 与 C 值拷贝的本质区别。
+- 不可变类型（int/str/tuple）让引用语义"看起来像"值语义（因不能原地改），但底层仍是引用（见 Q78/Q84）。
+
+
+## Q86
+- 类比精彩但需澄清：两者"骨架"相同——保持名字/接口不变、内部替换为增强版，即"同名替换"。这正是你 Q58/Q60 学的文件原地修改的精神内核。
+- 但本质机制不同：
+  1. 装饰器是"名字重新绑定（引用替换）"：`play_dnf = guanjia(play_dnf)` 让名字 play_dnf 指向新的 inner 对象，原函数在内存中并未被"删除"。
+  2. 文件修改是"磁盘字节覆盖/删除"：`os.replace(new, source)` 真的把旧文件内容从磁盘抹掉。
+  3. 关键反直觉点：装饰器**没有删除原函数**——闭包里 game 仍持有原始函数对象，只要还有引用就永不销毁。已实测：用 old = play_dnf 保住原引用后，old() 仍能调用原版；play_dnf is old 为 False（两个不同对象）。而文件修改（Q58）旧内容通常真没了。
+- 类比成立的部分：都是"对外名字不变、内部实现增强"，这正是装饰器"无侵入增强"与文件"原地更新"的共同哲学。
+- 一句话：装饰器 = 内存中把名字重定向到包裹函数（原函数作为闭包被保留）；文件修改 = 磁盘上把旧字节覆盖（旧内容丢失）。骨架像，落点不同。
+
+
+## Q87 解答要点
+
+- 装饰器 vs 直接改原函数：装饰器**不修改原函数源码**，而是新建一个 wrapper 函数，把函数名重绑到 wrapper；原函数对象仍被闭包保留（可恢复）。直接修改要改源码，且难复用、难撤销、难组合多个功能。
+- 装饰器本质 = 函数嵌套 + 函数一等公民 + 名字重绑。`@` 只是 `f = deco(f)` 的语法糖，没有魔法。
+- "外挂"只是教学比喻。真实游戏外挂靠内存修改 / DLL 注入 / 封包拦截实现，不是包一个 Python 函数；本比喻仅用于理解"在原函数前后插入行为"。
+- 已有别人的外挂（已包一层），要再加自己的：**在他外层再装饰一层**（嵌套在最外），不要改他的源码。`mine = cheat_B(their_cheat(orig))`，调用时从最外层向里执行：B 开 → A 开 → 原函数 → A 关 → B 关。
+- 是否冗余/易错：每层是独立功能，不算冗余；主要风险点——①忘记 `return wrapper`（名字变成 None）②忘记在 wrapper 内调用原函数（原函数不执行）③参数签名不匹配（用 `*args, **kwargs` 透传解决）④元数据丢失（用 `functools.wraps` 解决）。层数过多会让调试变深但可控。
+
+
+## Q88 解答要点
+
+- wrapper 字面义 = 包装物 / 包裹层；在装饰器里指装饰器内部定义、用来"包住"原函数的那个函数。
+- 它负责：前置操作 -> 调用原函数 func() -> 后置操作 -> 返回结果；通过闭包记住传进来的 func。
+- wrapper 不是 Python 关键字，只是约定俗成的命名；可叫 inner / wrapped / proxy 等，效果一样。
+- 易混点：functools.wraps 的 wraps 是另一个装饰器（用于把原函数 __name__/__doc__ 复制到 wrapper），与 wrapper 函数本身不是一回事。
+- 结合 Q87：cheat_B 里的 wrapper 是"最外层"，包住 cheat_A 的结果；cheat_A 里的 wrapper 包住原函数。
+
+
+## Q89 解答要点（纠正误解）
+
+- @guanjia 展开为 guanjia(play_dnf)，play_dnf 无括号 = 只把"函数对象"这个值传进去，并未调用它，因此此步没有任何实参（argument）参与。
+- play_dnf 是名字（引用），表达式 play_dnf 求值得到函数对象；传过去的是该对象本身，不是字符串名字，也不是调用结果。
+- 函数对象"自带"的是它的形参签名（def 时定义的 a,b 等），这是函数对象定义的一部分（存在 __code__ 里），任何拿到该对象时都能看到；它不是"装饰时才额外携带"的东西，更不是实参值。
+- 实参（真正的值，如 play_dnf(1,2) 里的 1,2）只有在"以后调用 play_dnf(...)"时才出现，那时调用的是被重绑后的 wrapper，wrapper 必须能接收并透传这些实参（故要用 *args,**kwargs），否则报 TypeError。
+- 一句话：装饰这一步只传递函数对象（含其定义好的形参结构），不传递任何实参；实参是后续调用 wrapper 时才进场。
+
+
+## Q90 解答要点（纠正误解）
+
+- 纠正：('admin','123456') 不是传给管家 guanjia 的。guanjia 只在装饰时收到裸函数对象 play_dnf（见 Q89），此刻这些实参还根本不存在（调用行还没执行）。
+- 两个时刻分清：① 装饰时 @guanjia -> guanjia(play_dnf)，只传函数对象；② 调用时 play_dnf('admin','123456')，此时 play_dnf 已被重绑为 inner，所以实参是传给 inner（wrapper），不是传给 guanjia。
+- 报错根因：inner 收下了 ('admin','123456')，但内部 game() 没把这些参数透传给原函数，导致原函数抱怨缺参。
+- 两种报错对应两种 inner 写法：inner() 无参 -> 'inner takes 0 positional arguments but 2 were given'；inner(username,password) 但内部 game() 不传参 -> 'play_dnf() missing 2 required positional arguments'。
+- 修复：在 inner 内把参数转发给原函数——game(username,password)，或更通用的 def inner(*args,**kwargs): game(*args,**kwargs)（见 Q87/Q89 透传原则）。
+- 函数对象"携带"的只是形参签名（定义时写入 __code__），不是实参值。
+
+
+## Q91 解答要点（逐行注释 + 隐患）
+
+- guanjia(game)：装饰时只收到函数对象，game = 被装饰的原函数（无实参，见 Q89/Q90）。
+- inner(username,password)：wrapper，其形参给"未来调用者"用；game(...) 把收到的实参原样透传给原函数（Q90 透传）。
+- return inner：@guanjia 等价于 play_dnf = guanjia(play_dnf)，名字被重绑到 inner，原函数在闭包里保留。
+- 重申：@guanjia 那行只传函数对象，没有 'admin'/'123456' 等实参；用户原内联注释仍含该误解。
+- 隐患：play_lol 有 3 个形参，而 inner 写死 2 个 (username,password)。调用 play_lol(a,b,c) 会报 inner() takes 2 positional arguments but 3 were given；即便 inner 改 3 参，game(username,password) 也只转 2 个给需 3 参的 play_lol -> 缺 hero。
+- 正确通用写法：inner(*args,**kwargs) + game(*args,**kwargs)，一个装饰器套任意签名函数（已验证于 code_12_带参装饰器.py）。
+
+
+## Q92 解答要点（检验 + game 透传机制）
+
+- 用户四步分析基本正确：① 赋值先算右侧，guanjia(play_dnf) 仅收到函数对象，game 绑到原函数；② def inner 只是创建函数对象、未调用；③ return inner 使 play_dnf 名重绑到 inner；④ play_dnf('admin','123456') 实际调 inner('admin','123456')；inner 未调用前其内部 game(...) 确实没执行过（game 变量已存在，但调用未发生）。
+- 修正表述：传入的是"play_dnf 这个函数对象的值"，不是"函数名字符串"。
+- game(*args,**kwargs) 为何要加参数：game 即原函数 play_dnf(username,password)，必须收到 username/password；若写裸 game() 则报 missing 2 required positional arguments（Q90 错误）。
+- 如何加进去：两层 * 作用相反——① inner(*args,**kwargs) 定义处用 * 把调用者实参"收集"成元组 args；② game(*args,**kwargs) 调用处用 * 把 args"解包"回位置参数，变成 game('admin','123456')。一收一放即为透传。
+- 调用时执行顺序：inner 收到 args=('admin','123456') -> 打印"打开外挂" -> game(*args) 解包调原函数打印"来吧勇士们..." -> 打印"关闭外挂"。
+- 补充：若要保留原函数返回值，应写 return game(*args,**kwargs)（当前 print 型函数无影响）。
+
+- `@guanjia` 后名字 `play_dnf` 已被重绑到 `inner`；`play_dnf("admin","123456")` 实际调用的是 `inner(...)`。
+- `inner(*args, **kwargs)` 的 `*` 在【定义处】=收集：把 `("admin","123456")` 收成元组 `args`。
+- `game(*args, **kwargs)` 的 `*` 在【调用处】=解包：把 `args` 展开回 `game("admin","123456")`。
+- `game` 是被闭包保存的「原 play_dnf 函数对象」（与现名字 play_dnf 已非同一引用）；`game(...)` 即执行原函数体。
+- 名字 `play_dnf` 现在指向 inner，但 `game` 仍指向原函数对象；二者曾经指向同一对象，装饰后名字被改绑，原函数靠闭包存活。
