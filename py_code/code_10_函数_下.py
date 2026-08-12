@@ -23,6 +23,7 @@ def target():
     print("我是目标函数")
 规则：wrapper1 wrapper2 target wrapper2 wrapper1
 """
+from sqlalchemy import false
 
 # 迭代器
 # 生成器
@@ -456,3 +457,63 @@ def target():
 # print(ret)
 # target()
 
+
+# 装饰器实战
+# 写一个员工管理系统
+# 对登录的账号进行验证
+login_flag = False
+
+
+def login_verify(fn):
+    def inner(*args, **kwargs):
+        # 在此处进行登录验证
+        global login_flag
+        # 此为当正确时才执行，但实际的登录原理，不该是，登录失败才再次进行操作吗
+        # 所以我们进行修改为False
+        if login_flag == False:
+            print("还为完成登录操作")
+            while True:
+                username = input(">>>")
+                password = input(">>>")
+                if username == "admin" and password == "123456":
+                    print("登陆成功")
+                    # 而由于其为全局变量，所以我得需要进行引入
+                    # 此为登陆成功时记录状态
+                    # 无需进行下此验证
+                    login_flag = True
+                    break
+                else:
+                    print("登陆失败，用户名或者密码错误")
+        ret = fn(*args, **kwargs) # 后续的具体功能函数
+        return ret
+    return inner
+
+
+
+# 此为具体的功能函数
+# 而在执行之前我们是否先需要一个管理员的账户登录
+@login_verify
+def add():
+    print("添加员工信息")
+
+@login_verify
+def delete():
+    print("删除员工信息")
+
+@login_verify
+def update():
+    print("修改员工信息")
+
+@login_verify
+def search():
+    print("查询员工信息")
+
+# 先执行新增进行验证
+
+add()
+# 当我每次执行时都需要再重新登录
+# 那我该如何在登陆成功之后，能否留下一个登录成功的状态
+# 让我不再需要重复的验证
+delete()
+update()
+search()

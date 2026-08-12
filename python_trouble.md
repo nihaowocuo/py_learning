@@ -348,3 +348,7 @@ wrapper 是什么意思？在装饰器里 wrapper 这个词是指什么？
 
 ## Q93: game(*args, **kwargs) 解包处——调用的是 inner 传入的参数，然后 game 获取参数进入 play_dnf() 执行？
 确认：调用 play_dnf("admin","123456") 实际是调 inner；inner 用 *args 收集实参；game(*args) 解包后调用原函数（game 即原 play_dnf 函数对象）。
+
+## Q94: 教程登录验证装饰器为何写 `if login_flag == False:`？
+代码：login_flag 全局变量初始 False；login_verify 装饰器 inner 内先判断 login_flag==False 才走登录，成功后置 True。
+疑问：1) 登录原理不该是"失败才再操作"吗，为何用 ==False 判断？2) 每次执行都要重新登录，如何在登录成功后保留状态、免重复验证？

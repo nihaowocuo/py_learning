@@ -438,3 +438,7 @@ cat >> "E:/py_learning/.workbuddy/memory/2026-07-26.md" <<'EOF'
 ## Q93
 - 问题：game(*args,**kwargs) 解包处，是 inner 传入的参数，然后 game 获取参数进入 play_dnf() 执行？
 - 答复：对。play_dnf 已被重绑为 inner，调用即调 inner；inner 收集实参后，game(*args) 解包调用原函数（game 即原 play_dnf 对象）。
+
+## Q94
+- 问题：登录装饰器为何用 `if login_flag == False:`？为何不直接"失败才操作"？如何免重复验证？
+- 答复：`login_flag` 是登录态标记，==False 即"未登录才弹框"，是正确闸口写法；"失败才重试"是内层 while 的职责。全局变量+global 让登录态被四个函数共享，一次登录后免重复验证；重登只因重启进程。

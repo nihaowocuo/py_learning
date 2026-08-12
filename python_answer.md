@@ -955,3 +955,11 @@ Windows 的 App Execution Alias 是 UWP/Store 应用的一种机制，让传统�
 - `game(*args, **kwargs)` 的 `*` 在【调用处】=解包：把 `args` 展开回 `game("admin","123456")`。
 - `game` 是被闭包保存的「原 play_dnf 函数对象」（与现名字 play_dnf 已非同一引用）；`game(...)` 即执行原函数体。
 - 名字 `play_dnf` 现在指向 inner，但 `game` 仍指向原函数对象；二者曾经指向同一对象，装饰后名字被改绑，原函数靠闭包存活。
+
+- `login_flag` 是"本次运行是否已登录"的状态位：False=未登录，True=已登录。
+- `if login_flag == False:` 语义：尚未登录才弹登录框；已登录直接放行。这是标准门卫/会话闸口写法，正确。
+- 两层逻辑勿混：外层 if 管"会话登录态"（已登录整体跳过登录框）；内层 while+else 管"单次凭证对错"（输错才重试）——"失败才再操作"是内层循环的职责，不是外层 if。
+- 全局变量 + `global` 的必要性：四个 inner 是独立函数对象，彼此无共享局部变量；要让"登录一次、四个都认"，必须有一个公共存储；`global login_flag` 声明改的是模块级全局，否则 `login_flag=True` 只改了局部变量、出函数即失效，下次仍是 False -> 每次重登。
+- 本设计在一个程序运行内**已不重复登录**：首调 add 成功后置 True，后调 delete/update/search 因 `login_flag==False` 为 False 而跳过登录框。
+- 若实测每次都重登，唯一原因是每次重新启动程序（进程结束，全局变量归零回 False）。要跨重启免登需把状态存文件/会话/数据库。
+- 初始 `login_flag = False` 正确：程序启动默认处于未登录状态。
