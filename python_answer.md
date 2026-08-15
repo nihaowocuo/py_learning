@@ -992,3 +992,90 @@ Windows 的 App Execution Alias 是 UWP/Store 应用的一种机制，让传统�
 - CPython 实现印证：list_iterator 持有指向序列对象的指针(it_seq) + 索引(it_index)。指针指向的是容器，索引才是进度。用户指针一样的直觉对了一半。
 - 没有真实数据再分：生成器确实不保存已产出值(按需算)；容器迭代器的数据真实存在于原容器(共享、不重复建)。省内存=不预建/不复制整份集合。
 - 结论：迭代器=持来源引用 + 逻辑位置/进度，按需产出；不是记录各元素的内存地址。
+
+- 库的定义：库=别人写好、可 import 复用的代码集合。Python 分标准库(os/json/re 等，内置无需装)与第三方库(requests/numpy/tensorflow 等，需 pip install)。本质=避免重复造轮子。
+- 库与技术栈：技术栈=做项目所选的技术组合(语言+库/框架+工具+数据库)。库/框架是技术栈的零件；框架=带架构约束的特殊库(如 Flask/Django 定结构)。技术栈=按业务需求挑库组合。
+- 与 Java 的关系：库的概念相同(都是可复用代码包)。区别：Java 用 package+jar、Maven/Gradle 管依赖、编译成字节码跑 JVM；Python 用模块/包+pip+PyPI、解释执行。Python 的 import 对应 Java 的 import+依赖声明。两者可混栈：Spark/Hadoop 用 Java/Scala 写但提供 Python API；Py4J/Jython 实现互通。
+- 衔接实例：刚看的 requirementsALL.txt 里每一项(requests/Flask/tensorflow…)就是一个库，是该开源项目的零件清单。
+
+## Q102（版本与第三方库适配，2026-08 数据）
+- 官方版本状态（python.org，当前 2026-08）：
+  - 最新稳定版：3.14（2025-10-07 发布，bugfix 支持到 2030-10；最新补丁 3.14.7 于 2026-08-05）。
+  - 上一版仍 bugfix：3.13（2024-10-07 发布，支持到 2029-10）。
+  - security-only：3.12(->2028-10)、3.11(->2027-10)、3.10(->2026-10)。
+  - 已 EOL：3.9（2025-10-31 终止）及更早。
+  - 未来：3.15 计划 2026-10 发布，当前仅 pre-release/rc，生态未铺开。
+- 第三方库适配规律：
+  - 纯 Python 库（无 C 扩展）：基本无缝，pip 直接装。
+  - 带 C 扩展库（numpy/pandas/pytorch 等）：需 PyPI 有对应 cp3xx 预编译 wheel，适配滞后；3.14 需 cp314（自由线程版 cp314t）。
+  - 大库进度（2026 中）：NumPy 2.5 支持 3.12-3.14；PyTorch 2.9-2.13 支持 >=3.10 <=3.14；Django 6.0/5.2 LTS 支持 3.12-3.14；pandas 3.0 支持 3.11+；pydantic 2.13 支持 >=3.10(含3.14)。
+  - 生态覆盖最完整区间 = 3.12-3.13；3.14 适配基本完成但小库/科学计算库仍有滞后；3.10 处于被新库放弃临界点；3.8/3.9 已被新版本剔除。
+- 用户本机：managed 3.13.12 + system 3.13.7，正好落在生态最完整区间，适合学习与开发。
+- 选型：新项目默认 3.13（最稳）或 3.14（最新，带 JIT/自由线程）；保守生产用 3.11/3.12；勿用 <=3.9。
+
+## Q103（为何有两个 Python 环境，2026-08）
+- 本质：这两个不是虚拟环境(venv)，而是两个独立的 Python 解释器安装(interpreter)。
+- 来源不同：
+  - managed 3.13.12 = C:\Users\nihaowocuo\.workbuddy\binaries\python\versions\3.13.12\python.exe，是 WorkBuddy 为安全隔离执行 AI 生成代码而自带的『受管运行时』，放在用户目录、与系统隔离。
+  - system 3.13.7 = D:\py\python.exe，是用户自己在机器上安装的 Python，用于日常写代码/跑脚本。
+- 为何需要两个：WorkBuddy 自带一份干净可控的 Python 跑 AI 代码，避免污染你的系统环境、也避免被你的环境干扰（运行时隔离规则：AI 代码在 managed 跑、依赖只装进 managed 的 venv，不弄脏 D:\py）。
+- 版本差异：3.13.12 vs 3.13.7 同属 3.13 系列，语法/标准库一致；补丁号不同，且各自 site-packages 独立（第三方库各装各的）。
+- 默认优先：AI 优先用 managed（隔离安全），仅在它不满足需求时回退 system。
+- 用户日常用哪个：取决于终端 python 指向谁；之前报错 D:\py\python.exe ... 用的就是 system。
+- 注意：两处第三方库互不相通；在 WorkBuddy 跑需要某库时须在 managed 的 venv 里安装。
+
+## Q104（managed 含义，2026-08）
+- managed = 受管理的 / 托管的，是 WorkBuddy 给运行时贴的分类标签，与 system（用户自装）相对。
+- 指『由 WorkBuddy 自动下载、安装、并统一管理（路径/版本/依赖隔离）的运行时』，非用户手动安装。
+- 关键特征（来自运行时规则）：
+  - 装在隔离目录 C:\Users\nihaowocuo\.workbuddy\binaries\python\versions\...，不进系统目录、不写系统 PATH、不动 D:\py。
+  - pre-configured for isolated, safe execution：预配置为隔离、安全执行；依赖(pip 包)只能装进 managed 自己的 venv，不污染用户环境。
+  - preferred（优先）：只要满足需求 AI 就用它，而非系统 Python。
+  - system 是 fallback（备用）：仅当 managed 不满足时才回退到用户自装的 D:\py。
+- 更大视角：IDE 自动装 JDK、nvm/setup-python 等都属于 managed runtime 思路——工具自带可控环境，用户免配置。
+- 用户无需操心 managed 的内部（装了啥、占空间、能否删），正常用 D:\py 学习即可；它由 WorkBuddy 自管自。
+
+## Q105（写入文件默认 GBK 编码报错，2026-08）
+- 报错链条：response.read() 拿字节 -> decode(utf-8) 成功变 str -> f.write() 写文件时要把 str 再编码回字节，而 open(xxx,w) 未指定 encoding，Windows 中文系统默认 GBK(cp936) -> 网页里有 (Unicode 私用区 PUA 字符，常见于网站特殊图标) GBK 编码表没有它 -> UnicodeEncodeError。
+- 根因：解码端 utf-8 没问题，编码端(写入)默认 GBK 兜不住全部 Unicode。
+- 修复：open 时显式指定 utf-8：with open(路径,w,encoding=utf-8) as f: f.write(...)；更稳加 errors=replace 兜底防其他怪字符。
+- 补充： 属私用区(U+E000-F8FF)无公共定义，GBK 不支持正常，utf-8 能存全部 Unicode。
+- 进阶：若网页本身是 gbk 编码(老中文站)，decode(utf-8) 会报错或乱码，需看响应头 charset 或 requests 的 response.encoding/apparent_encoding；urllib 可尝试 headers 里 charset 或直接用 requests。
+
+## Q106（爬虫=快照非实时，2026-08）
+- 结论：爬虫拿到的是『发出请求那一刻』的网页快照，看起来实时，但不是实时连接/推送。
+- 为什么看起来实时：网页内容由服务器动态生成，每次请求都返回当下最新版；隔段时间再爬内容就变，那是重新请求的结果，不是推送。
+- 核心区分：
+  - 爬虫=拉取(pull)：只在发请求那一刻有数据，之后无流动；
+  - 实时推送(push)：WebSocket/SSE 等，服务器主动把变化推给你，无需反复请求。
+- 想更实时怎么做：
+  - 定时轮询：循环+time.sleep 反复请求（本质仍是拉取）；频率别太高，会被封 IP/加重服务器负担，需限速延时。
+  - 网站若有 WebSocket/JSON 实时接口，直接连更优。
+- 重要提醒：urllib/requests 拿到的是未执行 JS 的原始 HTML；靠 JS 动态渲染的实时内容(行情/新闻流)不会出现在文件里。要么抓 XHR/JSON 接口，要么用 Selenium/Playwright 模拟浏览器。
+
+## Q107（Web 请求分析，2026-08）
+- 定义：观察并拆解每个网络请求（URL/方法/Headers/Body/状态码/响应），看数据从哪来、怎么来。工具：浏览器 F12->Network（最常用零成本）；Charles/Fiddler/mitmproxy/Wireshark（专业抓包）。
+- HTTP 请求/响应组成：URL、方法(GET/POST)、请求头(User-Agent/Cookie)、请求体(POST 数据)、状态码(200/404/403)、响应头(charset/content-type)、响应体(HTML 或 JSON)。
+- 与当前所学关系（同一件事两个视角）：
+  1. urllib = 亲手发请求(客户端)；F12 Network = 查看/记录请求(观察者)。每个 urlopen 在 Network 里就是一条记录。
+  2. 破解 JS 动态内容：F12 Network 找真正返回数据的接口(多为 XHR/Fetch 的 JSON)，用 Python 直接请求该接口=爬接口，比爬页面干净高效。
+  3. 反爬对抗：403 时对比浏览器请求与代码请求差异，通常缺 User-Agent/Cookie/Referer，补上即可。
+  4. 查编码：响应头 charset 决定 decode 方式(Q105 问题的正规解法)。
+- 学习建议：当前阶段先记住 F12->Network 是看请求的地方；等遇到爬不到动态数据再回来用，一看即会。
+
+## Q108（浏览器页面内查找功能，2026-08）
+- 本质：这是浏览器自带的 Find in Page（页面内查找）功能，不是网页源代码自己实现的。
+- 触发方式：Windows 按 Ctrl+F，macOS 按 Cmd+F；Chrome/Firefox/Edge/Safari 都支持。
+- 搜索对象：当前标签页渲染的所有文本，包括 view-source: 视图里的 HTML 源码文本、普通网页文字、开发者工具面板等。
+- 显示 6/112 含义：当前在 112 个匹配项中的第 6 个；上下箭头切换、Enter 跳转。
+- 与爬虫的关系：浏览器里靠肉眼 Ctrl+F 定位；Python 爬虫拿到 HTML 字符串后，用代码做同样的事——str.find()/count()、正则 re、BeautifulSoup/xpath 按标签/属性/文本提取。
+- 小技巧：在普通网页按 Ctrl+F 搜索也能快速判断内容是否在 HTML 里（JS 动态加载的内容可能搜不到源码但页面可见）。
+
+## Q109（Chrome DevTools Network 面板空白排查，2026-08）
+- 最常见原因 1：未开启录制。Network 面板左上角有一个大红点/灰点(Recording network log)，灰色=未录制。点击变红后再刷新页面才会记录。
+- 最常见原因 2：打开 Network 面板前页面已经加载完。DevTools 只记录打开后发生的请求；首次使用需在打开面板后按 Ctrl+R/F5 刷新。
+- 原因 3：过滤器/类型筛选。顶部的 Filter 输入框或 All/XHR/JS/CSS/Img 等按钮可能勾选了只显示某类；点 All 并清空 Filter 即可。
+- 原因 4：隐藏了列。表头右键可选显示哪些列(Name/Status/Type/Size/Time...)，可能误关。
+- 原因 5：启用了过滤 URL 或禁用缓存/隐身模式设置导致；另某些扩展会拦截请求。
+- 标准操作流程：打开网页 -> F12 -> Network -> 确认红点录制中 -> Ctrl+R 刷新 -> 看列表。
+- 与爬虫关系：Network 是找接口/分析请求的工具（Q107），必须能正常看到请求才能用它辅助爬虫。

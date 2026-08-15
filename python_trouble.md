@@ -364,3 +364,30 @@ wrapper 是什么意思？在装饰器里 wrapper 这个词是指什么？
 
 ## Q98: 迭代器内部存了指针一样的东西、没有真实数据、只记录其内存位置对吗？
 细化 Q97：用户把记录位置理解为指向数据字节的内存地址(指针)。
+
+## Q101: py中的库是什么和技术栈有什么关系，和java又有什么关系
+用户概念性提问：库的定义、库与技术栈的关系、与 Java 的关系。
+
+## Q102: 当前主流的 Python 版本是多少，能够适配第三方库
+用户问：当前主流 py 版本、与第三方库适配情况。
+
+## Q103: 为何我会有两个 python 环境
+用户问：本机为何有两个 Python（3.13.12 managed 与 3.13.7 system），是否冲突/多余。
+
+## Q104: managed 是什么
+用户问：运行时标注 (managed) 的含义。
+
+## Q105: UnicodeEncodeError gbk codec cant encode character ue687
+爬虫 code_16 报错：f.write(response.read().decode(utf-8)) 时 UnicodeEncodeError: gbk codec cant encode character  in position 22091。
+
+## Q106: 我所进行的爬取是实时的吗
+用户爬百度页面后疑惑：获取的信息似乎是实时的，爬取是否算实时。
+
+## Q107: web请求分析是什么，他和我当前所学的有什么关系
+用户问：Web 请求分析（F12 Network/抓包）概念，及与 urllib 爬虫学习的关系。
+
+## Q108: 这是如何实现在网页源代码中进行搜索功能的
+截图显示 Chrome 查看网页源代码(view-source:)时右上角出现搜索框，输入周杰伦后高亮并显示 6/112。问实现原理。
+
+## Q109: 为何教程中 Network 有这么多数据，而我的 name 等都是一片空白
+截图：豆瓣电影分类排行榜 Chrome DevTools Network 面板，列出了大量请求(hyperrank?type_name=... 等)。用户自己的 Network 面板 name/status/type 等列为空。
