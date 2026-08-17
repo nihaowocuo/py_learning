@@ -1079,3 +1079,230 @@ Windows 的 App Execution Alias 是 UWP/Store 应用的一种机制，让传统�
 - 原因 5：启用了过滤 URL 或禁用缓存/隐身模式设置导致；另某些扩展会拦截请求。
 - 标准操作流程：打开网页 -> F12 -> Network -> 确认红点录制中 -> Ctrl+R 刷新 -> 看列表。
 - 与爬虫关系：Network 是找接口/分析请求的工具（Q107），必须能正常看到请求才能用它辅助爬虫。
+
+## Q110（用 .gitignore 排除目录，2026-08）
+- 方法：在项目根目录 E:\py_learning 创建/编辑 .gitignore 文件，添加一行 `python-mini-projects-master/`（末尾斜杠表示目录）。
+- 生效范围：.gitignore 只对未跟踪(untracked)文件生效；保存后 Sourcetree 的未暂存文件列表会自动过滤掉该目录。
+- 若目录已提交过(tracked)：先 `git rm -r --cached python-mini-projects-master` 从索引移除（保留本地文件），再提交一次；之后 .gitignore 才生效。
+- Sourcetree 操作：工作副本根目录 → 新建/编辑 .gitignore → 添加规则 → 暂存并提交 .gitignore 本身。
+- 注意：.gitignore 本身需要提交到仓库，否则换台机器/别人 clone 后规则不生效。
+- 与当前所学关系：Git 是文件版本管理工具；大型第三方项目/依赖/练习代码通常不提交进主仓库，用 .gitignore 排除是标准做法。
+
+## Q111（SSR 与 CSR 详解，2026-08）
+- 服务器渲染 SSR (Server-Side Rendering)：
+  - 流程：浏览器请求 URL -> 服务器在后台把数据+HTML模板拼成完整页面 -> 一次性返回带数据的 HTML -> 浏览器直接展示。
+  - 特点：页面源代码(view-source)里能看到数据；urllib/requests 直接爬 HTML 就能拿到内容。
+  - 例子：传统新闻站、博客、早期电商详情页、Jinja2/Django 模板渲染的页面。
+- 客户端渲染 CSR (Client-Side Rendering)：
+  - 流程：浏览器第一次请求只拿到一个空 HTML 骨架(含 JS 引用) -> 浏览器执行 JS -> JS 再发第二次请求(ajax/fetch)到服务器/接口拿数据 -> JS 把数据填进页面。
+  - 特点：页面源代码里只有骨架，看不到真实数据；urllib/requests 拿到的 HTML 是空的，必须用 F12 Network 找到真正的 JSON 接口，或用 Selenium/Playwright 模拟浏览器。
+  - 例子：Vue/React/Angular 单页应用(SPA)、现代前后端分离项目、豆瓣/知乎等很多动态列表。
+- 与爬虫关系：
+  - SSR -> 爬 HTML 即可(str/re/BeautifulSoup)。
+  - CSR -> 找 XHR/Fetch 接口直接请求 JSON(更干净)；或上浏览器自动化。
+- 判断方法：view-source 里 Ctrl+F 搜关键词，搜得到=SSR，搜不到=CSR。
+
+## Q112（urllib 导入语句详解，2026-08）
+- 整体：这是一条 Python 导入语句，把 urllib.request 模块里的 urlopen 函数直接引入当前作用域。
+- 分词：
+  - `urllib` = Python 标准库里负责『网络 URL 操作』的总包（无需 pip 安装，装好 Python 就有，呼应 Q101 标准库）。
+  - `urllib.request` = urllib 下的子模块，专门管『打开/请求 URL』。
+  - `urlopen` = 该子模块里的一个函数，作用 = 向一个 URL 发请求并打开/读取它（返回类文件对象，可 .read()）。
+- 等价写法对比：
+  - `from urllib.request import urlopen` -> 之后直接写 `urlopen(url)`。
+  - `import urllib.request` -> 之后要写 `urllib.request.urlopen(url)`（前缀更长）。
+  - `import urllib.request as req` -> 写 `req.urlopen(url)`。
+- 为什么用 from 写法：少写前缀，调用更简洁；爬虫场景 urlopen 是高频函数。
+- 后续：urlopen 返回的对象用 .read() 拿字节，再 .decode(utf-8) 成字符串（Q105 讲过）。
+
+## Q113（Cookie 详解，2026-08）
+- 定义：Cookie = 服务器发给浏览器的一小段文本数据，浏览器存到本地，之后每次向同域名发请求时自动带上它。
+- 核心背景：HTTP 协议本身是无状态(stateless)的——每个请求互不相识。Cookie 是让服务器『记住你是谁/登录了没』最常用的手段。
+- 工作流程：
+  1. 浏览器首次访问 -> 无 cookie。
+  2. 服务器响应头带 Set-Cookie: sessionid=abc123 -> 浏览器存下。
+  3. 之后浏览器每次请求自动在请求头带 Cookie: sessionid=abc123 -> 服务器据此识别身份/保持登录。
+- 作用：登录态保持、购物车、个性化设置、追踪用户。
+- 与之前所学对比：
+  - 你 Q94/95/96 写的 login_flag 是存在『程序内存(全局变量)』里，进程结束就没；
+  - Cookie 是存在『浏览器(客户端)』里，有生命周期(会话级/持久化)，可跨请求、跨页面甚至跨进程保留。
+  - 思路一致=都是『保存一个状态位让后续请求识别』，只是存储位置不同。
+- 与爬虫关系：
+  1. 模拟登录：先 POST 登录拿服务器返回的 cookie，之后请求带上该 cookie 就能保持登录态(等同已登录)。
+  2. 反爬：很多网站校验 Cookie 是否存在/合法，缺了返回 403；爬虫需在请求头带上 Cookie(或先请求一次拿 Set-Cookie)。
+  3. urllib 用法：urlopen 时构造 Request 对象，request.add_header(Cookie, xxx)；或用 http.cookiejar 自动管理。
+- 相关概念：Session 是服务器端对应 cookie 的状态存储；localStorage/sessionStorage 是浏览器本地存储(不被请求自动携带)。
+
+## Q114（Provisional headers 原因，2026-08）
+- 含义：Provisional headers = 临时/预检请求头。Chrome 告诉你：这个请求实际并没有真正发送到网络（或已被本地缓存拦截），当前展示的是浏览器准备发送、但尚未实际发送的请求头，所以不完整。
+- 根本原因：浏览器缓存命中。该资源之前已经请求过，存在本地缓存（disk cache/memory cache），浏览器直接用缓存，不再发完整 HTTP 请求，因此只能显示 provisional 的请求头（往往只有 Referer 等少数字段）。
+- 如何解决/看完整头：
+  1. 勾选 Network 面板顶部的 "Disable cache"（禁用缓存）复选框。
+  2. 保持 DevTools 打开状态。
+  3. 按 Ctrl+R / F5 刷新页面。
+  4. 此时请求会真正发到服务器，Request Headers 会显示完整字段（User-Agent、Cookie、Accept 等）。
+- 与爬虫关系：
+  - 爬虫代码第一次请求时通常不会带浏览器缓存，所以 provisional headers 不代表代码实际会发的头。
+  - 如果要模拟浏览器请求，应以 Disable cache 后的完整 Request Headers 为准（尤其 Cookie、User-Agent、Referer 等反爬关键字段）。
+  - 提示：Network 面板里资源 Size 列显示 "disk cache" 或 "memory cache" 也代表走了缓存。
+
+## Q115（Request Headers 逐行解释，2026-08）
+- 注意：以冒号开头的是 HTTP/2 伪头(Pseudo-Headers)，不是普通请求头，浏览器自动填充。
+- `:authority`: img1.doubanio.com -> 请求的目标主机/域名，HTTP/2 中替代 Host。
+- `:method`: GET -> HTTP 请求方法，GET 表示向服务器索取资源。
+- `:path`: /f/vendors/.../douban.js -> 请求的资源路径（不含域名）。
+- `:scheme`: https -> 使用的协议，https 表示加密传输。
+- `Accept: */*` -> 浏览器告诉服务器：我接受任何 MIME 类型的返回内容（因为是 JS 文件，这里写 */* 表示不挑）。
+- `Accept-Encoding: gzip, deflate, br, zstd` -> 浏览器支持的压缩格式，服务器可任选一种压缩后再传输，省流量。
+- `Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7` -> 浏览器偏好的语言，q 是权重(0-1)，优先简体中文，其次英语。
+- `Cache-Control: no-cache` -> 要求中间代理/浏览器在返回缓存前必须先到服务器确认是否过期。
+- `Pragma: no-cache` -> HTTP/1.0 时代的旧版 no-cache，兼容老系统。
+- `Priority: u=1` -> HTTP/3/2 优先级提示，u=1 表示紧急度，用于资源调度（哪个请求先处理）。
+- `Referer: https://search.douban.com/movie/...` -> 来源页地址，告诉服务器我从哪个页面跳转过来的（反爬常校验这个）。
+- `Sec-Ch-Ua: "Not=A?Brand";v="99", ...` -> 客户端品牌/版本(Client Hints)，辅助识别浏览器。
+- `Sec-Ch-Ua-Mobile: ?0` -> 0 表示不是移动设备。
+- `Sec-Ch-Ua-Platform: "Windows"` -> 操作系统平台是 Windows。
+- `Sec-Fetch-Dest: script` -> 这个请求的目的是加载脚本(script)。
+- `Sec-Fetch-Mode: no-cors` -> 请求模式为 no-cors，适用于图片/CSS/JS 等跨站资源，不检查跨域。
+- `Sec-Fetch-Site: cross-site` -> 请求从 search.douban.com 发到 img1.doubanio.com，属于跨站。
+- `Sec-Fetch-Storage-Access: none` -> 未使用存储访问 API。
+- `User-Agent: Mozilla/5.0 ... Chrome/151.0.0.0 Safari/537.36` -> 浏览器身份标识，告诉服务器我是什么浏览器/系统（爬虫反反爬最需要模拟的头）。
+- 爬虫相关：urllib 默认 User-Agent 很简陋，易被反爬。模拟浏览器时常只需加 `User-Agent` 和 `Referer`，复杂反爬再补 Cookie/Sec-*。
+
+## Q116（General + Response headers 逐行解释，2026-08）
+- General 部分：
+  - Request URL: https://img1.doubanio.com/.../douban.js -> 完整请求地址。
+  - Request Method: GET -> HTTP 方法，获取资源。
+  - Status Code: 200 OK -> 服务器成功返回了资源（最理想的响应码）。
+  - Remote Address: 119.188.212.41:443 -> 服务器真实 IP 和端口，443 = HTTPS。
+  - Referrer Policy: unsafe-url -> 当前页面在发跨站请求时，会把完整 Referer 带过去。
+- Response headers（服务器返回给浏览器的信息）：
+  - Accept-Ranges: bytes -> 服务器支持断点续传/按字节范围请求。
+  - Age: 44639 -> 该资源已在 CDN/代理缓存中存了 44639 秒（约 12.4 小时）。
+  - Cache-Control: max-age=31104000 -> 告诉浏览器：这个资源可以缓存 31104000 秒（约 1 年），一年内不用再请求。
+  - Content-Encoding: br -> 服务器用 Brotli(br) 算法压缩后传输的，浏览器收到后解压。
+  - Content-Type: application/x-javascript -> 返回内容的 MIME 类型，表示这是一个 JS 文件。
+  - Date: Mon, 17 Aug 2026 15:16:46 GMT -> 服务器生成这个响应的时间。
+  - Expires: Sun, 11 Jul 2027 20:15:28 GMT -> 过期时间，和 Cache-Control 配套。
+  - Last-Modified: Wed, 21 Jan 2004 19:51:30 GMT -> 资源最后修改时间（该 JS 版本固定、CDN 长期缓存）。
+  - Ohc-Cache-Hit / Ohc-File-Size / Ohc-Global-Saved-Time -> 豆瓣/Ohc CDN 自定义头，记录缓存命中、文件大小、全局缓存时间。
+  - Server: marco/3.2 -> 服务器软件标识（豆瓣自定义或内部命名）。
+  - Via: S.mix-hz-fdi-168, ... -> 请求经过的 CDN/代理节点链路。
+  - X-Cache-Status: HIT -> CDN 缓存命中，这个资源是从边缘节点缓存直接返回的，没回源站。
+  - X-Dae-App: staticng -> 豆瓣内部应用名，静态资源服务。
+  - X-Dae-Instance: web.default -> 处理请求的服务实例。
+  - X-Envoy-Gateway: 1 -> 使用了 Envoy 网关。
+  - X-Request-Id: a0417... -> 请求唯一 ID，用于服务端链路追踪/日志排查。
+  - X-Source: C/200 -> 内部标识，C 可能表示 Cache，200 表示状态。
+- 与爬虫关系：
+  - 200 OK 表示请求成功；常见还有 404（资源不存在）、403（被拒绝）、500（服务器内部错误）、302/301（重定向）。
+  - Content-Type 告诉爬虫返回的是 HTML、JSON、JS 还是图片；urllib 拿到的 Content-Type 可在 resp.headers 里读。
+  - Content-Encoding: br/gzip 表示响应被压缩，urllib 默认会自动处理 gzip；若手动处理需解压。
+  - Cache-Control/Expires 影响浏览器缓存策略；爬虫代码不受浏览器缓存影响。
+
+## Q117（API / 缓存命中 / CDN 详解，2026-08）
+- API (Application Programming Interface 应用程序接口)：
+  - 定义：程序与程序之间沟通的契约/通道。A 程序想用 B 程序的功能，不读 B 源码，而是按 B 规定的『地址+参数+返回格式』发请求，拿到结果。
+  - 例子：Q111 讲的 CSR 页面，前端 JS 去调服务器的 JSON 接口，那个接口就是 API。爬虫常直接调 API 拿结构化数据(JSON)。
+  - 与函数类比：函数有 名字/参数/返回值；API 类似 = URL(名字) + 参数 + 返回 JSON(返回值)。
+- 缓存命中 (Cache Hit)：
+  - 定义：要的数据已经在缓存里，直接取，没回源。对应 X-Cache-Status: HIT。
+  - 反义 Cache Miss：缓存没有，必须去源站重新取。
+  - 例子：你第二次打开豆瓣，JS 文件已在 CDN 缓存中，X-Cache-Status: HIT，服务器不用重新算/重新传，快且省带宽。
+  - 爬虫注意：缓存命中的响应可能和回源一致，但爬虫代码本身不依赖浏览器缓存，每次 urlopen 是新请求。
+- CDN (Content Delivery Network 内容分发网络)：
+  - 定义：把内容复制到遍布各地的边缘节点(服务器)，用户就近访问，速度快、源站压力小。
+  - 例子：img1.doubanio.com 就是豆瓣的 CDN 域名；你 Q116 看到的 Via: S.mix-hz-fdi-168 是杭州的 CDN 节点；Age 44639 表示已在节点缓存 12 小时。
+  - 好处：离用户近 -> 延迟低；扛高并发；源站不被打爆。
+  - 爬虫注意：同一资源不同地域 CDN 节点返回的 IP 可能不同(Remote Address 会变)，但内容一致。
+- 三者关系串讲：爬虫/前端调用 API -> 服务器常把响应放 CDN -> 用户就近取，若 CDN 已有则缓存命中(HIT)直接返回，无需回源。
+
+## Q118（pip install 安装到哪，2026-08）
+- 结论：pip install 安装到当前 pip 所关联的 Python 解释器的 site-packages 目录里。具体位置由「执行 pip 命令时用的是哪个 Python」决定，不是由代码文件在哪决定。
+- 查看当前 pip 属于哪个 Python（不同系统）：
+  - Windows: `where pip` 或 `where python`，或 `pip --version`（会显示关联的 Python 路径）。
+  - macOS/Linux: `which pip` 或 `which python`，或 `pip --version`。
+- 常见安装路径：
+  - Windows: `<Python安装目录>\Lib\site-packagesequests`
+  - macOS: `<Python路径>/lib/python3.x/site-packages/requests`
+- PyCharm 终端的特殊性：PyCharm 终端默认使用项目配置的 Python 解释器（项目名旁会显示解释器路径），所以 pip install 会装进该项目的解释器。若项目配置了 venv 虚拟环境，就装进 venv 的 site-packages。
+- 结合 Q103 双 Python 环境：
+  - 在普通系统终端运行 `pip install requests` -> 装进 system Python (D:////py) 的 site-packages。
+  - 在 WorkBuddy managed 终端/venv 里运行 -> 装进 managed Python 的隔离 venv。
+  - 两个环境互不相通，在哪运行 pip，库就装进哪。
+- 初学者最大坑：在终端 A 装了 requests，然后在终端 B 运行 python 代码，提示 ModuleNotFoundError。原因=两个终端用的不是同一个 Python，site-packages 不共享。
+- 推荐做法：
+  1. 养成习惯：运行 python 和安装库用同一个解释器。
+  2. 用 `python -m pip install requests` 代替裸 `pip install requests`，确保安装到当前 python 对应的环境。
+  3. 用虚拟环境（venv/conda）隔离项目依赖。
+
+
+### Q119 答：URL 编码（百分号编码）
+
+**核心**：`%E5%91%A8%E6%9D%B0%E4%BC%A6` = 中文"周杰伦"的 UTF-8 字节用 `%XX` 十六进制表示。
+
+- 周 = `0xE5 0x91 0xA8` → `%E5%91%A8`
+- 杰 = `0xE6 0x9D 0xB0` → `%E6%9D%B0`
+- 伦 = `0xE4 0xBC 0xA6` → `%E4%BC%A6`
+
+**为什么**：
+- URL 规范（RFC 3986）只能含 ASCII，中文必须转义。
+- 转义法：每个字节 → `%` + 两位十六进制。
+
+**验证**：
+```python
+from urllib.parse import unquote
+unquote('%E5%91%A8%E6%9D%B0%E4%BC%A6')  # -> '周杰伦'
+```
+
+**注意**：
+- 浏览器地址栏显示"周杰伦"是自动解码，复制出来仍是编码串。
+- `requests.get()` 接受中文或编码串都行，内部会自动处理。
+
+
+### Q120 答：浏览器把输入当成搜索词
+
+**最可能原因**：浏览器默认搜索引擎是百度，粘贴带 `%` 编码的 URL 时浏览器判断不像正常网址，当成搜索词丢给百度。
+
+**验证**：看地址栏最终 URL。
+- `baidu.com/s?wd=...` → 被搜索化（浏览器行为）
+- `sogou.com/...` 但内容是百度 → DNS 劫持/扩展重定向（少见）
+
+**避免**：
+- 粘贴时加 `https://` 协议头
+- 从已加载页面的地址栏复制（必带协议头）
+
+**爬虫无关**：Python `urlopen` 直接发 HTTP 请求不经浏览器，不会出现此问题。
+
+
+### Q121 答：你访问的不是 sogou，是 PyCharm 内置服务器打开的本地百度快照
+
+**真相**：地址栏 `localhost:63342/Task_01.py/my_baidu.html` 三个部分：
+- `localhost:63342` = PyCharm 内置 HTTP 服务器端口（不是 sogou，也不是百度）
+- `Task_01.py` = PyCharm 项目名
+- `my_baidu.html` = 之前 `code_17_http协议.py` 用 `urlopen + write` 存下来的**百度首页离线副本**
+
+**为什么看起来"活的"百度**：
+- HTML 里 `<img>` `<link>` 用绝对路径 `https://www.baidu.com/...`，浏览器实时去网上加载资源
+- 所以 logo、热搜、字体全显示
+- 但**整个文件是写盘那一刻的快照**，不是实时数据
+
+**代码 vs 浏览器是两件事**：
+- 想看 sogou 实时结果：跑 `code_18_request_入门.py`，看 `print(resp.text)` 或 `resp.status_code`（200=成功）
+- 不要把 PyCharm 写的本地 HTML 跟"访问 sogou 看到的页面"混为一谈
+
+**结论**：把代码运行结果（浏览器里手动访问 sogou 或 `print(resp.text)`）和"双击打开本地 my_baidu.html"分开看。
+
+
+### Q122 答：PyCharm 对 HTML 文件有"在浏览器中预览"功能，与运行 Python 代码是两件事
+
+**两种"运行"行为**：
+- 选中 `.py` → 运行 ▶️ → 执行 Python，控制台打印输出，不开浏览器
+- 选中 `.html` → 点浏览器图标 / 右键 Open in Browser → 启动**内置 HTTP 服务器**（端口 63342）服务该文件，浏览器打开 `localhost:63342/.../xxx.html`
+
+**为何用 HTTP 服务器而非 file://**：
+- `file://` 协议有同源策略限制，AJAX、相对路径 JS 模块会被浏览器拦截
+- 内置服务器模拟真实网站，相对路径资源、AJAX 正常工作
+- 是 PyCharm 的设计功能，方便前端调试
+
+**正确操作**：想看 sogou 结果，选中 `code_18_request_入门.py` → 右键 Run → 看控制台 `print(resp.text)`；不要对 HTML 文件点浏览器图标。

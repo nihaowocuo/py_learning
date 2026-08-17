@@ -391,3 +391,50 @@ wrapper 是什么意思？在装饰器里 wrapper 这个词是指什么？
 
 ## Q109: 为何教程中 Network 有这么多数据，而我的 name 等都是一片空白
 截图：豆瓣电影分类排行榜 Chrome DevTools Network 面板，列出了大量请求(hyperrank?type_name=... 等)。用户自己的 Network 面板 name/status/type 等列为空。
+
+## Q110: 我想将这些练习项目排除我的提交
+截图 Sourcetree：未暂存文件列表里有大量 python-mini-projects-master/ 下文件，用户想排除整个目录不提交。
+
+## Q111: 这具体是什么意思能否举例详解
+截图：教程注释解释服务器渲染(SSR)与客户端渲染(CSR)。
+
+## Q112: from urllib.request import urlopen 是什么意思
+用户问爬虫首行导入语句含义。
+
+## Q113: cookie是什么
+用户问 Web 中 cookie 概念，与爬虫/登录的关系。
+
+## Q114: 为什么显示 Provisional headers are shown
+截图 Chrome Network 面板右侧 Headers -> Request Headers 区域显示黄色警告："⚠️ Provisional headers are shown. Disable cache to see full headers." 用户问原因。
+
+## Q115: 请为我解释每一行代码的含义
+截图 Chrome Network 面板 Request Headers，请求的是 img1.doubanio.com 上的 douban.js 文件，含 HTTP/2 伪头和常规请求头。
+
+## Q116: 解释 General 和 Response headers 含义
+用户发两张截图：图1 为同一请求的 Response headers（服务器返回头），图2 为 General（请求概要：URL/Method/Status Code/Remote Address/Referrer Policy）。请求的是 img1.doubanio.com 上的 douban.js。
+
+## Q117: api，缓存命中，CDN是什么意思
+用户问三个基础概念（结合 Q116 响应头里的 X-Cache-Status/CDN）。
+
+## Q118: 这种是安装到哪
+截图：教程在 PyCharm 终端输入 pip install requests，用户问安装到哪个 Python 环境。
+
+
+## Q119
+
+为何网址会变成一连串数字（%E5%91%A8%E6%9D%B0%E4%BC%A6）。截图：https://www.sogou.com/web?query=%E5%91%A8%E6%9D%B0%E4%BC%A6
+
+
+## Q120
+
+访问搜狗 URL（`https://www.sogou.com/web?query=...`）后，为何直接出现的是百度的界面？
+
+
+## Q121
+
+用户截图：图1 显示 PyCharm 中 `code_18_request_入门.py` 代码（`requests.get('https://www.sogou.com/web?query=%E5%91%A8%E6%9D%B0%E4%BC%A6')`）；图2 显示 Chrome 打开 `localhost:63342/Task_01.py/my_baidu.html`，看到的是百度界面。问"检测我当前的问题"。
+
+
+## Q122
+
+为何 PyCharm 仍"默认打开"本地 HTML 文件（`my_baidu.html`），而不是运行 Python 代码访问 sogou？

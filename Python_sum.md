@@ -494,3 +494,51 @@ cat >> "E:/py_learning/.workbuddy/memory/2026-07-26.md" <<'EOF'
 ## Q109
 - 问题：教程 Network 有很多请求，我的 name 等列为空白？
 - 答复：多为 DevTools 未开启录制或打开后未刷新。标准步骤：F12 -> Network -> 确认左上角红点录制中 -> Ctrl+R 刷新。也可能 Filter/类型筛选或列被隐藏导致。
+
+## Q110
+- 问题：如何把 python-mini-projects-master 排除在提交外？
+- 答复：在项目根目录 .gitignore 里加 `python-mini-projects-master/`。若已提交过，先 `git rm -r --cached python-mini-projects-master` 移除索引再提交；.gitignore 本身也要提交。
+
+## Q111
+- 问题：截图中服务器渲染和客户端渲染是什么意思？
+- 答复：SSR=服务器把数据拼进 HTML 一起返回，源码里有数据，直接爬 HTML 即可；CSR=服务器先返回空骨架，浏览器再执行 JS 去接口拉数据填页面，源码里没数据，需找 JSON 接口或用浏览器自动化。判断：view-source 里搜关键词，搜到是 SSR，搜不到是 CSR。
+
+## Q112
+- 问题：from urllib.request import urlopen 是什么意思？
+- 答复：导入标准库 urllib 下 request 子模块的 urlopen 函数到当前作用域。urllib=网络URL操作标准库；request=请求子模块；urlopen=发请求并打开URL的函数。等价写法 import urllib.request 后需写 urllib.request.urlopen(url)。from 写法调用更简洁。
+
+## Q113
+- 问题：cookie 是什么？
+- 答复：服务器发给浏览器的文本数据，浏览器存本地、之后每次请求自动带回，用来在无状态的 HTTP 上维持状态(登录/购物车/追踪)。流程：服务器 Set-Cookie -> 浏览器存 -> 后续请求自动带 Cookie。与 login_flag 思路同(保存状态位)，但存在浏览器(客户端)而非程序内存。爬虫里用于模拟登录态、过反爬(urllib 用 Request.add_header(Cookie) 或 cookiejar)。
+
+## Q114
+- 问题：为什么 Network 里 Request Headers 显示 Provisional headers are shown？
+- 答复：因为该资源被浏览器本地缓存命中，未真正发网络请求，只能展示临时头。解决：勾选 Network 顶部的 Disable cache，再刷新页面即可看完整 Request Headers。爬虫模拟请求时应以禁用缓存后的完整头为准。
+
+## Q115
+- 问题：解释截图 Request Headers 每一行含义。
+- 答复：以 `:` 开头的是 HTTP/2 伪头（authority=目标主机、method=GET、path=资源路径、scheme=https）。常规头 Accept 表示接受类型、Accept-Encoding 支持压缩、Accept-Language 语言偏好、Cache-Control/Pragma 控制缓存、Referer 来源页、Sec-Ch-* 客户端信息、Sec-Fetch-* 请求上下文、User-Agent 浏览器身份。爬虫里最常模拟 User-Agent 和 Referer。
+
+## Q116
+- 问题：解释 General 和 Response headers 每一行含义。
+- 答复：General 显示请求 URL、GET 方法、状态码 200 OK、服务器 IP:443、Referrer Policy。Response headers 是服务器返回的元信息：Accept-Ranges 支持断点、Age 缓存时长、Cache-Control 缓存策略、Content-Encoding 压缩方式(br)、Content-Type 文件类型、Date/Expires/Last-Modified 时间、Ohc-* 豆瓣 CDN 自定义头、Via 代理链路、X-Cache-Status:HIT 缓存命中、X-Request-Id 链路追踪 ID。爬虫重点关注 Status Code 和 Content-Type。
+
+## Q117
+- 问题：API、缓存命中、CDN 分别是什么？
+- 答复：API=程序间沟通的接口(URL+参数+返回JSON)，爬虫常直接调它拿数据；缓存命中=要的数据已在缓存直接取、不必回源(X-Cache-Status:HIT，反义 Miss)；CDN=把内容复制到各地边缘节点让用户就近访问(如 img1.doubanio.com、Via 杭州节点)。三者串：调 API->放 CDN->就近取->命中则直接返回。
+
+## Q118
+- 问题：pip install requests 装到哪？
+- 答复：装到当前 pip 关联的 Python 解释器的 site-packages 目录。具体位置取决于执行 pip 时用的是哪个 Python（PyCharm 终端默认用项目配置的解释器）。不同终端/环境 site-packages 独立，建议用 `python -m pip install xxx` 确保装对位置，避免 ModuleNotFoundError。
+
+
+- Q119：URL 编码 = UTF-8 字节的 %XX 表示，中文必须转义才能放进 URL；`unquote()` 反解。
+
+
+- Q120：浏览器地址栏粘贴带 `%` 编码的 URL 可能被当成搜索词（默认搜索引擎=百度），加 `https://` 协议头可避免；Python 爬虫不受影响。
+
+
+- Q121：用户在 PyCharm 跑 sogou 代码，但浏览器看到的不是 sogou 而是 `localhost:63342/.../my_baidu.html`（PyCharm 内置服务器打开的百度首页离线副本）。判断页面真伪看地址栏：本地文件 ≠ 真实网络请求。
+
+
+- Q122：PyCharm 对 HTML 文件点"Open in Browser"会启动内置 HTTP 服务器（63342 端口）预览本地文件，与运行 Python 代码无关；想看代码结果要 Run .py 文件看控制台。

@@ -19,25 +19,25 @@ java，c等都可
 # 从这个包内把后面的这个东西导入进来
 # url为与网址有关的库，从这个库中再找到request这个库，ruquest内有个东西叫urlopen（即打开网址）
 #
-from urllib.request import urlopen
-url = 'http://www.baidu.com'
-# 响应，但里面不只有我们想要的，而是有很多的响应头等
-# 此处我想要的是内容主体
-response = urlopen(url)
-# 从响应中读取内容
-# response.read()
-
-# 输出了一些的字节
-# print(response.read())
-# 我该如何将字节还原成字符串
-# 给出的解码提示：charset=UTF-8"
-# print(response.read().decode("utf-8"))
-# 打开一个文件存储这些信息
-# 注意此处的默认写入编码
-with open("my_baidu.html",mode="w",encoding="utf-8") as f:
-    f.write(response.read().decode("utf-8")) # 读取到的是网页的源代码
-
-print("over!")
+# from urllib.request import urlopen
+# url = 'http://www.baidu.com'
+# # 响应，但里面不只有我们想要的，而是有很多的响应头等
+# # 此处我想要的是内容主体
+# response = urlopen(url)
+# # 从响应中读取内容
+# # response.read()
+#
+# # 输出了一些的字节
+# # print(response.read())
+# # 我该如何将字节还原成字符串
+# # 给出的解码提示：charset=UTF-8"
+# # print(response.read().decode("utf-8"))
+# # 打开一个文件存储这些信息
+# # 注意此处的默认写入编码
+# # with open("my_baidu.html",mode="w",encoding="utf-8") as f:
+# #     f.write(response.read().decode("utf-8")) # 读取到的是网页的源代码
+# #
+# # print("over!")
 # 注意我所获取的信息似乎是实时的
 # 算是半个实时的,因为当你启动程序时,其便读取到的是这一刻的信息
 # 其是无法自行更新的(限于当前的所学无法更新,实际上是有实时请求的)
@@ -54,3 +54,4 @@ print("over!")
 # 那我当找到第二次请求的url,我是否就能拿到此数据
 
 # 这就需要抓包工具,浏览器的也可以
+# f12打开后选择network即可查看接口
